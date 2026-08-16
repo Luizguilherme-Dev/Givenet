@@ -1,0 +1,192 @@
+/* Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Cores principais */
+:root {
+  --primary-blue: #0d6efd;
+  --primary-dark-blue: #084298;
+  --secondary-blue: #66a1ff;
+  --light-blue: #f0f7ff;
+  --gray-light: #e9ecef;
+  --gray-dark: #495057;
+  --white: #fff;
+}
+
+/* Body */
+body {
+  background-color: var(--light-blue);
+  color: var(--gray-dark);
+  min-height: 100vh;
+  padding: 0 20px 40px;
+}
+
+/* Header */
+header {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--white);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Logo */
+header .logo {
+  font-weight: 700;
+  font-size: 1.8rem;
+  letter-spacing: 1px;
+  cursor: default;
+  user-select: none;
+}
+
+/* Navegação */
+header nav ul {
+  list-style: none;
+  display: flex;
+  gap: 30px;
+}
+
+header nav ul li {
+  position: relative;
+}
+
+header nav ul li a {
+  color: var(--white);
+  font-weight: 600;
+  text-decoration: none;
+  padding: 8px 10px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  display: inline-block;
+  font-size: 1rem;
+}
+
+/* Animação hover nas categorias */
+header nav ul li a:hover,
+header nav ul li a:focus {
+  background: var(--secondary-blue);
+  box-shadow: 0 4px 15px var(--secondary-blue);
+  transform: translateY(-3px) scale(1.05);
+  text-decoration: none;
+  outline: none;
+}
+
+/* Cards Container */
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+  margin: 40px auto;
+  max-width: 1100px;
+  padding: 0 15px;
+}
+
+/* Card */
+.card {
+  background-color: var(--white);
+  border-radius: 15px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1);
+  padding: 25px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 30px rgba(13, 110, 253, 0.3);
+}
+
+/* Ícone do card */
+.card .icon {
+  font-size: 3.5rem;
+  color: var(--primary-blue);
+  margin-bottom: 15px;
+  transition: color 0.3s ease;
+}
+
+.card:hover .icon {
+  color: var(--primary-dark-blue);
+}
+
+/* Título do card */
+.card h3 {
+  font-size: 1.4rem;
+  margin-bottom: 10px;
+  font-weight: 700;
+  color: var(--primary-dark-blue);
+}
+
+/* Texto do card */
+.card p {
+  font-size: 1rem;
+  color: var(--gray-dark);
+  line-height: 1.4;
+}
+
+/* Botão principal */
+.btn-primary {
+  background-color: var(--primary-blue);
+  color: var(--white);
+  padding: 10px 22px;
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+  user-select: none;
+  margin-top: 20px;
+  align-self: center;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark-blue);
+}
+
+/* Footer simples */
+footer {
+  text-align: center;
+  padding: 15px 20px;
+  color: var(--gray-dark);
+  font-size: 0.9rem;
+  margin-top: 60px;
+}
+
+/* Responsividade */
+@media (max-width: 600px) {
+  header {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  header nav ul {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .fade-in {
+  opacity: 0;
+  animation: fadeInAnimation 1s forwards;
+}
+
+@keyframes fadeInAnimation {
+  to {
+    opacity: 1;
+  }
+}
+
+}

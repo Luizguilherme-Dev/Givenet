@@ -1,0 +1,101 @@
+/* ===== HEADER ===== */
+.header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 10px 20px;
+  background: rgba(15, 0, 40, 0.92);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fff;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  height: 50px;
+  box-sizing: border-box;
+}
+
+.logo {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-left: 15px; /* distância do menu */
+}
+
+/* ===== BOTÃO HAMBURGUER ===== */
+.menu-toggle {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 25px;
+  height: 18px;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+.menu-toggle span {
+  display: block;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.menu-toggle.open span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.menu-toggle.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-toggle.open span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* ===== MENU ===== */
+.nav {
+  position: fixed;
+  top: 50px;
+  left: -220px;
+  width: 200px;
+  height: calc(100vh - 50px);
+  background: rgba(15, 0, 40, 0.97);
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+  box-shadow: 2px 0 10px rgba(139, 92, 246, 0.4);
+  z-index: 1000;
+  transition: left 0.3s ease;
+}
+
+.nav.open {
+  left: 0; /* desliza para dentro */
+}
+
+.nav a {
+  color: #fff;
+  text-decoration: none;
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(168, 71, 71, 0.1);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.perfil-icon {
+  margin-left: auto;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.perfil-icon:hover {
+  background: rgba(255, 255, 255, 0.3);
+}

@@ -1,0 +1,341 @@
+/* ===== BODY E FUNDO ===== */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Helvetica, Arial, sans-serif;
+    background-size: cover;
+    color: #fff;
+}
+
+/* ===== LOTTIE FUNDO GLOBAL ===== */
+.page-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #1a0533 0%, #3b0764 30%, #6d28d9 70%, #a855f7 100%) !important;
+}
+
+.page-content {
+  position: relative;
+  padding: 20px 0;
+}
+
+/* ===== HEADER ===== */
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    height: 120px;
+    background-color: rgba(15, 219, 209, 0.9); /* Verde escuro semi-transparente */
+    color: white;
+    border-bottom: 5px solid rgba(18, 106, 109, 0.9);
+}
+
+/* Menu de navegação */
+nav {
+    display: flex;
+    align-items: center;
+}
+
+.abas {
+    text-decoration: none;
+    font-size: 20px;
+    color: white;
+    padding: 0 15px;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.abas:hover {
+    color: #FF6347;
+}
+
+.separador {
+    color: white;
+    font-size: 22px;
+}
+
+img {
+    height: 100px;
+}
+
+/* ===== CONTEÚDO PRINCIPAL ===== */
+.main-content {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #3cb7c7;
+}
+
+/* ===== APP CONTAINER ===== */
+.app-container {
+    background-color: rgba(244, 244, 249, 0.9);
+    padding: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(12, 15, 224, 0.26);
+    margin-top: 40px;
+}
+
+/* ===== LOGIN CONTAINER ===== */
+.login-container {
+    background-color: rgba(255, 255, 255, 0.9); /* semi-transparente */
+    padding: 30px 25px;
+    max-width: 400px;
+    margin: 80px auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    text-align: center;
+    color: #333;
+}
+
+.login-container h2 {
+    margin-bottom: 20px;
+    color: #0fdbd1;
+}
+
+.login-container input[type="text"],
+.login-container input[type="password"],
+.login-container input[type="email"],
+.login-container select,
+.login-container textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 2px solid #2bd0e6;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.login-container input::placeholder,
+.login-container textarea::placeholder {
+    color: #aaaaaa;
+}
+
+.login-container button {
+    width: 100%;
+    padding: 12px;
+    background-color: #17b5dd;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.login-container button:hover {
+    background-color: #FF6347;
+}
+
+.login-container .register-link {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.login-container .register-link a {
+    color: #2E8B57;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.login-container .register-link a:hover {
+    text-decoration: underline;
+}
+
+/* ===== FORMULÁRIOS ===== */
+.cadastro-container,
+.consulta-container {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+textarea {
+    height: 100px;
+    width: 100%;
+    resize: vertical;
+}
+
+input[type="number"] {
+    width: 100%;
+    height: 50px;
+}
+
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D'10'%20height%3D'7'%20viewBox%3D'0%200%2010%207'%20xmlns%3D'http://www.w3.org/2000/svg'%3E%3Cpath%20d%3D'M0%200l5%207%205-7z'%20fill%3D'%23008000'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px 7px;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+select:focus {
+    outline: none;
+    border-color: #2E8B57;
+    box-shadow: 0 0 5px #2E8B57;
+}
+
+input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #008000;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+input[type="file"]:focus {
+    outline: none;
+    border-color: #2E8B57;
+    box-shadow: 0 0 5px #2E8B57;
+}
+
+input[type="file"]::-webkit-file-upload-button {
+    background-color: #2E8B57;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+input[type="file"]::-webkit-file-upload-button:hover,
+input[type="file"]::-webkit-file-upload-button:focus {
+    background-color: #FF6347;
+}
+
+.file-name {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #555;
+    font-style: italic;
+}
+
+/* ===== CARDS ===== */
+.cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.produto-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    background-color: rgba(249, 249, 249, 0.9);
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.produto-imagem {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.botoes-card {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: auto;
+}
+
+/* ===== BOTÕES GERAIS ===== */
+button {
+    padding: 10px;
+    background-color: #2E8B57;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #FF6347;
+}
+
+/* ===== LISTAS ===== */
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul li {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ===== HR ===== */
+hr {
+    margin: 40px 0;
+    border: 1px solid #ddd;
+}
+/* Container de cards */
+.cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+/* Cards de dashboard (links para páginas) */
+.dashboard-card {
+    padding: 30px 20px;
+    border-radius: 12px;
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+}
+
+/* Cards de produtos (manter estilo atual, mas suavizar sombra) */
+.produto-card {
+    border-radius: 12px;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.9);
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.produto-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.produto-imagem {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}

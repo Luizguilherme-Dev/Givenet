@@ -1,0 +1,96 @@
+.cadastro-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 20px;
+  background: linear-gradient(135deg, #0a0010 0%, #1a0533 40%, #2d1060 70%, #0a0010 100%);
+}
+
+.cadastro-form-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 500px;
+}
+
+.cadastro-form {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 50px 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(82, 39, 255, 0.3);
+}
+
+.cadastro-form h2 {
+  color: #ffffff;
+  font-size: 2rem;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.cadastro-form p {
+  color: #e9d5ff;
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 0.95rem;
+}
+
+.cadastro-form input {
+  width: 100%;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.cadastro-form input::placeholder { color: #d8b4fe; }
+
+.cadastro-form input:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.2);
+}
+
+.btn-cadastro {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+  border: none;
+  color: white;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+  margin-top: 10px;
+}
+
+.btn-cadastro:hover {
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+}
+
+.cadastro-footer {
+  text-align: center;
+  margin-top: 25px;
+  color: #e9d5ff;
+  font-size: 0.95rem;
+}
+
+.cadastro-footer a {
+  color: #c4b5fd;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.cadastro-footer a:hover { text-decoration: underline; color: #fff; }
+
+@media (max-width: 768px) {
+  .cadastro-form { padding: 40px 30px; }
+}

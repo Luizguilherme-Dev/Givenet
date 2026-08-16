@@ -1,0 +1,197 @@
+.sobre-container {
+  min-height: 100vh;
+  padding: 50px 20px 40px;
+  overflow-x: hidden;
+  background: linear-gradient(160deg, #0a0010 0%, #1a0533 25%, #2d1060 50%, #1a0533 75%, #0a0010 100%);
+  position: relative;
+  z-index: 1;
+}
+
+.sobre-header,
+.sobre-section,
+.sobre-cta {
+  position: relative;
+  z-index: 1;
+}
+
+.sobre-header {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  text-align: center;
+  padding: 3rem 1rem 2rem;
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 60px;
+}
+
+.sobre-header h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(90deg, #ffffff, #e9d5ff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.sobre-header p {
+  font-size: 1.1rem;
+  color: #e9d5ff;
+  font-weight: 400;
+}
+
+.sobre-section {
+  max-width: 1200px;
+  margin: 0 auto 80px;
+}
+
+.sobre-content {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 50px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.sobre-section.reverse .sobre-content { flex-direction: row-reverse; }
+
+.sobre-content--full { display: block; }
+
+.sobre-text h2 {
+  font-size: 2.2rem;
+  color: #ffffff;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.sobre-text p {
+  font-size: 1.1rem;
+  color: #e9d5ff;
+  line-height: 1.8;
+  margin-bottom: 15px;
+}
+
+.sobre-icon {
+  font-size: 8rem;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 25px;
+  margin-top: 30px;
+}
+
+.step {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 25px;
+  border-radius: 15px;
+  transition: all 0.3s ease;
+}
+
+.step:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.step-number {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #a855f7, #7c3aed);
+  color: white;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 40px;
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+}
+
+.step h3 { color: #e9d5ff; font-size: 1.3rem; margin-bottom: 10px; font-weight: 600; }
+.step p  { color: #d8b4fe; font-size: 1rem; margin: 0; }
+
+.impact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 25px;
+  margin-top: 30px;
+}
+
+.impact-card {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.impact-card:hover {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.impact-icon { font-size: 3.5rem; margin-bottom: 15px; }
+.impact-card h3 { color: #ffffff; font-size: 1.3rem; margin-bottom: 10px; font-weight: 700; }
+.impact-card p  { color: #e9d5ff; font-size: 1rem; margin: 0; }
+
+.benefits-list { list-style: none; padding: 0; margin-top: 25px; }
+.benefits-list li {
+  font-size: 1.1rem;
+  color: #ffffff;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+.benefits-list li:hover {
+  background: rgba(255, 255, 255, 0.2);
+  padding-left: 24px;
+}
+
+.sobre-cta {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 60px 40px;
+  border-radius: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+}
+
+.sobre-cta h2 { font-size: 2.5rem; margin-bottom: 15px; font-weight: 700; }
+.sobre-cta p  { font-size: 1.2rem; margin-bottom: 30px; opacity: 0.95; }
+
+.cta-button {
+  background: white;
+  color: #7c3aed;
+  padding: 18px 40px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+
+.cta-button:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+
+@media (max-width: 768px) {
+  .sobre-content { flex-direction: column !important; padding: 30px; }
+  .sobre-icon { font-size: 5rem; }
+  .steps, .impact-grid { grid-template-columns: 1fr; }
+  .sobre-header h1 { font-size: 2rem; }
+  .sobre-text h2 { font-size: 1.8rem; }
+}
