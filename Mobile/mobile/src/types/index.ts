@@ -30,6 +30,7 @@ export interface Ong {
   historia?: string;
   foto?: string;
   fotoCapa?: string;
+  logo?: any;
   atuacao?: string[];
   numeros?: Array<{ valor: string; label: string }>;
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
@@ -51,7 +51,11 @@ export const Header: React.FC<{ title?: string; showBack?: boolean }> = ({
               activeOpacity={0.8}
             >
               <View style={styles.logoBadge}>
-                <Ionicons name="heart" size={18} color="#FFFFFF" />
+                <Image
+                  source={require('@/img/GiveNet.png')}
+                  style={styles.logoImage}
+                  resizeMode="contain"
+                />
               </View>
               <View>
                 <Text style={styles.brandTitle}>GiveNet</Text>
@@ -158,14 +162,20 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 10,
-    backgroundColor: GiveNetTheme.primary,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
     shadowColor: GiveNetTheme.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,
     shadowRadius: 4,
     elevation: 4,
+  },
+  logoImage: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
   },
   brandTitle: {
     fontSize: 16,

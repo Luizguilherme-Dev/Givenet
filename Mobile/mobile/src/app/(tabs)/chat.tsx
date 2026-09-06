@@ -17,8 +17,8 @@ import { ApiService } from '@/services/api';
 import { ChatMessage } from '@/types';
 
 const RESPOSTAS_SISTEMA: Record<string, string> = {
-  roupas: '👕 Nossas ONGs parceiras WWF Brasil, Cáritas e Instituto Ayrton Senna aceitam roupas e agasalhos em bom estado! Você pode agendar a coleta na aba Doação.',
-  alimentos: '🥫 Aceitamos alimentos não perecíveis como arroz, feijão, macarrão, óleo e leite em pó. A Cáritas e a WWF são ótimas opções!',
+  roupas: '👕 Nossas ONGs parceiras WWF Brasil, Instituto Ayrton Senna e AACD aceitam roupas e agasalhos em bom estado! Você pode agendar a coleta na aba Doação.',
+  alimentos: '🥫 Aceitamos alimentos não perecíveis como arroz, feijão, macarrão, óleo e leite em pó. O WWF Brasil e a AACD são ótimas opções!',
   aacd: '🦽 A AACD é especializada em reabilitação física e aceita cadeiras de rodas, muletas, andadores e equipamentos ortopédicos.',
   pin: '🔢 O PIN de confirmação é um código de 4 dígitos gerado ao registrar sua doação. Ele é usado na entrega para validar o status como Entregue.',
   coleta: '🕒 As coletas podem ser agendadas de segunda a sábado em horários das 08h às 18h diretamente no formulário de doação.',

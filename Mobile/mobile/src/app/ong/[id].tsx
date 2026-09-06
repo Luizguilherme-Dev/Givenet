@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Linking,
+  Image,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -90,7 +91,11 @@ export default function OngDetalheScreen() {
               { backgroundColor: ong.corClara || 'rgba(124, 58, 237, 0.2)' },
             ]}
           >
-            <Text style={styles.iconText}>{ong.icon || '🏢'}</Text>
+            {ong.logo ? (
+              <Image source={ong.logo} style={styles.iconImage} resizeMode="contain" />
+            ) : (
+              <Text style={styles.iconText}>{ong.icon || '🏢'}</Text>
+            )}
           </View>
 
           <Text style={styles.heroName}>{ong.nome}</Text>
@@ -315,6 +320,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
+    overflow: 'hidden',
+  },
+  iconImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 18,
   },
   iconText: {
     fontSize: 34,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { GiveNetTheme } from '@/constants/colors';
@@ -41,7 +41,11 @@ export const OngCard: React.FC<Props> = ({ ong, onDoarPress, onDetalhesPress }) 
             { backgroundColor: ong.corClara || 'rgba(124, 58, 237, 0.2)' },
           ]}
         >
-          <Text style={styles.iconText}>{ong.icon || '🏢'}</Text>
+          {ong.logo ? (
+            <Image source={ong.logo} style={styles.iconImage} resizeMode="contain" />
+          ) : (
+            <Text style={styles.iconText}>{ong.icon || '🏢'}</Text>
+          )}
         </View>
 
         <View style={styles.infoCol}>
@@ -131,6 +135,12 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  iconImage: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
   },
   iconText: {
     fontSize: 24,
