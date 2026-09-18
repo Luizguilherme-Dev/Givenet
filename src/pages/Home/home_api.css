@@ -1,0 +1,212 @@
+
+/* Container principal */
+.container-api {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+ 
+/* Título */
+.titulo-api {
+  text-align: center;
+  color: #333;
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  font-weight: bold;
+}
+ 
+/* Grid de produtos */
+.produtos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+  margin-bottom: 30px;
+}
+ 
+/* Card do produto */
+.produto-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+ 
+.produto-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+}
+ 
+/* Header do card */
+.produto-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+ 
+.produto-nome {
+  color: #d32f2f;
+  font-size: 1.5rem;
+  margin: 0;
+  flex: 1;
+}
+ 
+/* Status */
+.produto-status {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  white-space: nowrap;
+}
+ 
+.produto-status.ativo {
+  background-color: #4caf50;
+  color: white;
+}
+ 
+.produto-status.inativo {
+  background-color: #f44336;
+  color: white;
+}
+ 
+/* Categoria */
+.produto-categoria {
+  margin: -5px 0;
+}
+ 
+.categoria-badge {
+  display: inline-block;
+  background-color: #ff9800;
+  color: white;
+  padding: 5px 15px;
+  border-radius: 15px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+ 
+/* Descrição */
+.produto-descricao {
+  color: #666;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+  flex: 1;
+}
+ 
+/* Footer do card */
+.produto-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-top: auto;
+}
+ 
+.produto-preco {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #2e7d32;
+}
+ 
+/* Botão adicionar */
+.btn-adicionar {
+  background-color: #d32f2f;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  white-space: nowrap;
+}
+ 
+.btn-adicionar:hover:not(:disabled) {
+  background-color: #b71c1c;
+}
+ 
+.btn-adicionar:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+ 
+/* Estoque */
+.produto-estoque {
+  text-align: right;
+  color: #666;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+ 
+/* Loading e Error */
+.loading,
+.error {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2rem;
+}
+ 
+.loading {
+  color: #666;
+}
+ 
+.error {
+  color: #f44336;
+  background-color: #ffebee;
+  border-radius: 8px;
+  padding: 20px;
+}
+ 
+/* Sem produtos */
+.sem-produtos {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 1.2rem;
+}
+ 
+/* Responsividade */
+@media (max-width: 768px) {
+  .produtos-grid {
+    grid-template-columns: 1fr;
+  }
+ 
+  .titulo-api {
+    font-size: 2rem;
+  }
+ 
+  .produto-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+ 
+  .btn-adicionar {
+    width: 100%;
+  }
+}
+ 
+@media (max-width: 480px) {
+  .container-api {
+    padding: 10px;
+  }
+ 
+  .produto-card {
+    padding: 15px;
+  }
+ 
+  .produto-nome {
+    font-size: 1.3rem;
+  }
+ 
+  .produto-preco {
+    font-size: 1.5rem;
+  }
+}
+ 

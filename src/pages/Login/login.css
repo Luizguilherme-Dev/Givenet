@@ -1,0 +1,110 @@
+/* ===== PAGINA ===== */
+.login-page {
+  position: relative;
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  font-family: 'Helvetica', sans-serif;
+  background: linear-gradient(135deg, #0a0010 0%, #1a0533 40%, #2d1060 70%, #0a0010 100%);
+}
+
+/* ===== FORMULÁRIO ===== */
+.login-form-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.login-form {
+  width: 80%;
+  max-width: 400px;
+  text-align: center;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 10px 40px rgba(82, 39, 255, 0.4);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* ===== TEXTOS ===== */
+.login-form h2 {
+  margin-bottom: 10px;
+  color: #ffffff;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.login-form p {
+  margin-bottom: 30px;
+  color: #e9d5ff;
+}
+
+/* ===== INPUTS ===== */
+.login-form input {
+  width: 100%;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 16px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.login-form input::placeholder {
+  color: #d8b4fe;
+}
+
+.login-form input:focus {
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 10px rgba(82, 39, 255, 0.4);
+  outline: none;
+}
+
+/* ===== BOTAO ===== */
+.btn-login {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+
+.btn-login:hover {
+  box-shadow: 0 6px 15px rgba(139, 92, 246, 0.5);
+}
+
+/* ===== FOOTER ===== */
+.login-footer {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #e9d5ff;
+}
+
+.login-footer a {
+  color: #c4b5fd;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-footer a:hover {
+  text-decoration: underline;
+  color: #fff;
+}
+
+/* ===== RESPONSIVO ===== */
+@media (max-width: 900px) {
+  .login-page { flex-direction: column; }
+  .login-form-container { flex: none; height: auto; }
+}
+
