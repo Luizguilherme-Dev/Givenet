@@ -7,7 +7,7 @@ import "./AcompanhamentoDoacao.css";
 export function CardAcompanhamento({ doacao, onConfirmar, podeConfirmar, confirmando, onConfirmarPin }) {
   const [mostrarQR, setMostrarQR] = useState(false);
   const status = doacao.status?.toUpperCase() ?? "AGENDADO";
-  const isEntregue = status === "DOACAO_ENTREGUE";
+  const isEntregue = status === "CONCLUIDA" || status === "DOACAO_ENTREGUE";
   const isCancelado = status === "CANCELADO";
 
   const badgeClass = isEntregue ? "entregue" : isCancelado ? "cancelado" : "agendado";
@@ -118,19 +118,6 @@ export function CardAcompanhamento({ doacao, onConfirmar, podeConfirmar, confirm
             <span style={{ fontSize: "0.72rem", color: "rgba(196,181,253,0.7)", textTransform: "uppercase", letterSpacing: "0.5px" }}>PIN de entrega</span>
             <span style={{ fontSize: "1.4rem", fontWeight: 800, color: "#c4b5fd", letterSpacing: 8 }}>{doacao.pinConfirmacao}</span>
           </div>
-          {podeConfirmar && onConfirmarPin && (
-            <button
-              onClick={() => onConfirmarPin(doacao.id)}
-              disabled={confirmando}
-              style={{
-                padding: "8px 14px", fontSize: "0.82rem", fontWeight: 700,
-                background: "rgba(168,85,247,0.2)", border: "1px solid rgba(168,85,247,0.5)",
-                color: "#e9d5ff", borderRadius: 8, cursor: "pointer"
-              }}
-            >
-              {confirmando ? "..." : "Confirmar via PIN"}
-            </button>
-          )}
         </div>
       )}
 

@@ -2,12 +2,20 @@
   position: relative;
   min-height: 100vh;
   padding: 40px 20px;
+  background: linear-gradient(160deg, #0a0010 0%, #1a0533 25%, #2d1060 50%, #1a0533 75%, #0a0010 100%);
+  isolation: isolate;
 }
 
-.beams-bg {
+.faq-bg {
   position: fixed;
   inset: 0;
   z-index: 0;
+  pointer-events: none;
+}
+
+.faq-page > *:not(.faq-bg) {
+  position: relative;
+  z-index: 1;
 }
 
 .faq-container {

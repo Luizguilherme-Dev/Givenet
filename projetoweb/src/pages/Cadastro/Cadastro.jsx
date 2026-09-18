@@ -38,7 +38,7 @@ function Cadastro() {
         email,
         senha,
         telefone,
-      });
+      }, { withCredentials: true });
 
       toast.success("✅ Cadastro realizado com sucesso!", {
         position: "top-center",
@@ -110,6 +110,9 @@ function Cadastro() {
           </button>
 
           <div className="cadastro-footer">
+            <p>
+              Representa uma organização? <Link to="/sou-uma-ong">Sou uma ONG</Link>
+            </p>
             <p>
               Já possui conta? <Link to="/login">Faça login</Link>
             </p>

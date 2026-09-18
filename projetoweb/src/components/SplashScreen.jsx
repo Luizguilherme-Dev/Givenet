@@ -18,7 +18,7 @@ export default function SplashScreen({ onDone }) {
   return (
     <div className={`splash-overlay ${fase === "saindo" ? "splash-saindo" : ""}`}>
       <div className="splash-content">
-        <h1 className="splash-logo">
+        <h1 className="splash-logo">   
           <ShinyText
             text="GiveNet"
             color="#a855f7"

@@ -17,6 +17,8 @@ import Cadastro from "./pages/Cadastro/Cadastro";
 import Doacao from "./pages/Doacao/Doacao";
 import ConfirmarDoacao from "./pages/Doacao/ConfirmarDoacao";
 import Ong from "./pages/Ong/Ong";
+import SolicitarOng from "./pages/Ong/SolicitarOng";
+import Admin from "./pages/Admin/Admin";
 import Sobre from "./pages/Sobre/Sobre";
 import Faq from "./pages/Faq/Faq";
 import Perfil from "./pages/Perfil/Perfil";
@@ -35,7 +37,9 @@ function RoutesApp() {
 
           <Route path="/Doacao" element={<RotaPrivada><Doacao /></RotaPrivada>} />
           <Route path="/confirmar-doacao" element={<RotaAdmin><ConfirmarDoacao /></RotaAdmin>} />
+          <Route path="/admin" element={<RotaAdmin><Admin /></RotaAdmin>} />
           <Route path="/ong" element={<Ong />} />
+          <Route path="/sou-uma-ong" element={<SolicitarOng />} />
           <Route path="/Sobre" element={<Sobre />} />
           <Route path="/Faq" element={<Faq />} />
           <Route path="/perfil" element={<Perfil />} />
@@ -65,7 +69,7 @@ function Layout() {
 
 function RotaAdmin({ children }) {
   const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado"));
-  const isAdmin = usuarioLogado?.role === "ADMIN";
+  const isAdmin = usuarioLogado?.role === "ROLE_ADMIN" || usuarioLogado?.role === "ADMIN";
   if (!isAdmin) {
     toast.warning("⚠️ Acesso restrito a administradores.", { position: "top-center", toastId: "admin-negado" });
     return <Navigate to="/" replace />;

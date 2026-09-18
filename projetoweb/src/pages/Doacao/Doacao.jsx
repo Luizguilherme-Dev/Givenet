@@ -40,42 +40,7 @@ const aceitaPorONG = {
   "AACD": ["Cadeira de rodas", "Muletas", "Equipamentos de reabilitação"],
 };
 
-function ModalPin({ onConfirmar, onCancelar, loading }) {
-  const [pin, setPin] = useState("");
-  return (
-    <div className="modal-overlay">
-      <div className="modal-box">
-        <h3 className="modal-titulo">Confirmar via PIN</h3>
-        <p className="modal-desc">Digite o PIN de 4 dígitos da doação para confirmar a entrega.</p>
-        <input
-          type="text"
-          className="modal-input"
-          placeholder="0000"
-          value={pin}
-          maxLength={4}
-          onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
-          onKeyDown={(e) => e.key === "Enter" && pin.length === 4 && onConfirmar(pin)}
-          style={{ letterSpacing: 12, textAlign: "center", fontSize: "1.6rem", fontWeight: 800 }}
-          autoFocus
-        />
-        <div className="modal-acoes">
-          <button className="modal-btn-cancelar" onClick={onCancelar} disabled={loading}>Cancelar</button>
-          <button
-            className="modal-btn-confirmar"
-            onClick={() => onConfirmar(pin)}
-            disabled={loading || pin.length !== 4}
-          >
-            {loading ? (
-              <span className="modal-btn-inner"><span className="modal-spinner" />Confirmando...</span>
-            ) : "✅ Confirmar"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ModalConfirmarEntrega({ onConfirmar, onCancelar, loading, isOng }) {
+function ModalConfirmarEntrega({ onConfirmar, onCancelar, loading }) {
   const [senha, setSenha] = useState("");
   const [pin, setPin] = useState("");
   return (
@@ -83,26 +48,16 @@ function ModalConfirmarEntrega({ onConfirmar, onCancelar, loading, isOng }) {
       <div className="modal-box">
         <h3 className="modal-titulo">Confirmar Entrega</h3>
         <p className="modal-desc">
-          {isOng
-            ? "Informe sua senha e o PIN de 4 dígitos da doação."
-            : "Informe sua senha de administrador para confirmar a entrega."}
+          Informe o PIN de 4 dígitos da doação. A confirmação é exclusiva do administrador.
         </p>
-        <input
-          type="password"
-          className="modal-input"
-          placeholder="Sua senha"
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-          autoFocus
-        />
         <input
           type="text"
           className="modal-input"
-          placeholder="PIN de 4 dígitos (opcional)"
+          placeholder="PIN de 4 dígitos"
           value={pin}
           maxLength={4}
           onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
-          onKeyDown={(e) => e.key === "Enter" && (senha || pin) && onConfirmar(senha, pin)}
+          onKeyDown={(e) => e.key === "Enter" && pin.length === 4 && onConfirmar(pin)}
           style={{ marginTop: 8, letterSpacing: 8, textAlign: "center", fontSize: "1.2rem" }}
         />
         <div className="modal-acoes">
@@ -111,8 +66,8 @@ function ModalConfirmarEntrega({ onConfirmar, onCancelar, loading, isOng }) {
           </button>
           <button
             className="modal-btn-confirmar"
-            onClick={() => onConfirmar(senha, pin)}
-            disabled={loading || (!senha && !pin)}
+            onClick={() => onConfirmar(pin)}
+            disabled={loading || pin.length !== 4}
           >
             {loading ? (
               <span className="modal-btn-inner">
@@ -138,14 +93,12 @@ const Doacao = () => {
   const [loading, setLoading] = useState(false);
   const [confirmando, setConfirmando] = useState(null);
   const [modalDoacaoId, setModalDoacaoId] = useState(null);
-  const [modalPinId, setModalPinId] = useState(null);
   const [aba, setAba] = useState("registrar");
   const navigate = useNavigate();
 
   const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado") || "null");
-  const isAdmin = usuarioLogado?.role === "ADMIN";
-  const isOng = usuarioLogado?.role === "ONG";
-  const podeConfirmar = isAdmin || isOng;
+  const isAdmin = usuarioLogado?.role === "ROLE_ADMIN" || usuarioLogado?.role === "ADMIN";
+  const podeConfirmar = isAdmin;
 
   const fetchDoacoes = useCallback(async () => {
     if (!usuarioLogado?.id) return;
@@ -192,7 +145,7 @@ const Doacao = () => {
         toast.success("✅ Doação atualizada com sucesso!");
         setEditandoId(null);
       } else {
-        await axios.post("http://localhost:8080/doacoes", payload);
+        await axios.post("http://localhost:8080/doacoes", payload, { withCredentials: true });
         toast.success("✅ Doação registrada com sucesso!");
       }
       setOng("");
@@ -239,18 +192,15 @@ const Doacao = () => {
     }
   };
 
-  const handleConfirmarEntrega = async (senha, pin) => {
-    if (!senha && !pin) return;
+  const handleConfirmarEntrega = async (pin) => {
+    if (!pin) return;
     if (!modalDoacaoId) return;
     setConfirmando(modalDoacaoId);
-    const headers = isOng
-      ? { usuarioId: usuarioLogado?.id, usuarioSenha: senha }
-      : { usuarioId: usuarioLogado?.id, adminEmail: usuarioLogado?.email, adminSenha: senha };
     try {
       await axios.patch(
         `http://localhost:8080/doacoes/${modalDoacaoId}/confirmar-entrega`,
         {},
-        { headers, params: pin ? { pin } : {} }
+        { withCredentials: true, params: { pin } }
       );
       toast.success("✅ Entrega confirmada com sucesso!");
       setModalDoacaoId(null);
@@ -263,25 +213,6 @@ const Doacao = () => {
     }
   };
 
-  const handleConfirmarViaPin = async (pin) => {
-    if (!pin || pin.length !== 4 || !modalPinId) return;
-    setConfirmando(modalPinId);
-    try {
-      await axios.patch(
-        `http://localhost:8080/doacoes/${modalPinId}/confirmar-entrega`,
-        {},
-        { params: { pin } }
-      );
-      toast.success("✅ Entrega confirmada via PIN!");
-      setModalPinId(null);
-      fetchDoacoes();
-    } catch (err) {
-      const msg = err.response?.data?.message || err.response?.data || "PIN inválido ou erro ao confirmar.";
-      toast.error(`❌ ${msg}`);
-    } finally {
-      setConfirmando(null);
-    }
-  };
 
   return (
     <div className="page-wrapper">
@@ -292,17 +223,9 @@ const Doacao = () => {
           loading={confirmando === modalDoacaoId}
           onConfirmar={handleConfirmarEntrega}
           onCancelar={() => setModalDoacaoId(null)}
-          isOng={isOng}
         />
       )}
 
-      {modalPinId && (
-        <ModalPin
-          loading={confirmando === modalPinId}
-          onConfirmar={handleConfirmarViaPin}
-          onCancelar={() => setModalPinId(null)}
-        />
-      )}
 
       <div className="page-content">
         <div className="cadastro-container">
@@ -448,7 +371,6 @@ const Doacao = () => {
                       doacao={doacao}
                       podeConfirmar={podeConfirmar}
                       onConfirmar={(id) => setModalDoacaoId(id)}
-                      onConfirmarPin={(id) => setModalPinId(id)}
                       confirmando={confirmando === doacao.id}
                     />
                   ))}
@@ -468,7 +390,7 @@ const Doacao = () => {
                 )}
                 {doacoes.map((doacao) => {
                   const nomeOng = typeof doacao.ong === "object" ? doacao.ong?.nome : doacao.ong;
-                  const isEntregue = doacao.status === "DOACAO_ENTREGUE";
+                  const isEntregue = doacao.status === "CONCLUIDA" || doacao.status === "DOACAO_ENTREGUE";
                   return (
                     <li key={doacao.id} className="paciente-card">
                       <div>

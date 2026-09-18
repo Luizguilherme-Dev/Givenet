@@ -45,7 +45,7 @@ function PinDigits({ pinReal, pinDigitado }) {
 
 export default function ConfirmarDoacao() {
   const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado") || "null");
-  const isAdmin = usuarioLogado?.role === "ADMIN";
+  const isAdmin = usuarioLogado?.role === "ROLE_ADMIN" || usuarioLogado?.role === "ADMIN";
 
   const [doacaoId, setDoacaoId] = useState("");
   const [senhaAdmin, setSenhaAdmin] = useState("");
@@ -80,7 +80,7 @@ export default function ConfirmarDoacao() {
           adminSenha: senhaAdmin,
         },
       });
-      if (res.data.status === "DOACAO_ENTREGUE") {
+      if (res.data.status === "CONCLUIDA" || res.data.status === "DOACAO_ENTREGUE") {
         toast.warning("⚠️ Esta doação já foi confirmada.");
         return;
       }

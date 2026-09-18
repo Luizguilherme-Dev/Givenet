@@ -20,7 +20,7 @@ function Login() {
     }
 
     try {
-      const response = await axios.post("http://localhost:8080/usuarios/login", { email, senha });
+      const response = await axios.post("http://localhost:8080/usuarios/login", { email, senha }, { withCredentials: true });
       const usuarioEncontrado = response.data;
 
       localStorage.setItem("usuarioLogado", JSON.stringify(usuarioEncontrado));

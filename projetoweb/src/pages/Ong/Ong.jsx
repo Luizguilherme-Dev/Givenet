@@ -26,6 +26,7 @@ const ongDetalhes = {
     paises_atuacao: "+100 países",
     foto: fotoWWF,
     fotoCapa: fotoWWF,
+    mapa: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7696456.602793896!2d-52.59564443666623!3d-19.62578211541659!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x935a3035d529aae1%3A0x7903e0ca15a094e8!2sWWF-Brasil!5e0!3m2!1sen!2sbr!4v1789687774453!5m2!1sen!2sbr",
     sobre: "O WWF (World Wildlife Fund) é uma das maiores organizações de conservação da natureza do mundo. No Brasil, atua na proteção de biomas como Amazônia, Cerrado, Pantanal e Mata Atlântica, combatendo o desmatamento, a caça ilegal e as mudanças climáticas, promovendo o desenvolvimento sustentável.",
     historia: "Fundado em 29 de abril de 1961 em Morges, Suíça, por um grupo de cientistas e líderes conservacionistas, incluindo Sir Julian Huxley e Peter Scott — que criou o famoso logotipo do panda. O WWF Brasil foi estabelecido em 1996 e desde então desenvolve projetos de conservação em parceria com governos, empresas e comunidades locais. É reconhecido mundialmente por campanhas como a Hora do Planeta e por seu trabalho em políticas ambientais internacionais.",
     numeros: [
@@ -92,6 +93,7 @@ const ongDetalhes = {
     paises_atuacao: "Brasil",
     foto: fotoAACD,
     fotoCapa: fotoAACD,
+    mapa: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d234155.60138644645!2d-47.09319760546873!3d-23.507987100000005!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94cefe5f3cf52859%3A0xc900779fe0411f3c!2sAACD%20-%20Assistance%20Association%20for%20Disabled%20Children!5e0!3m2!1sen!2sbr!4v1789688054408!5m2!1sen!2sbr",
     sobre: "A AACD (Associação de Assistência à Criança Deficiente) é uma instituição filantrópica brasileira especializada na reabilitação de pessoas com deficiência física. Atende crianças, adolescentes e adultos com paralisia cerebral, lesão medular, amputações e malformações congênitas, oferecendo tratamento multidisciplinar gratuito pelo SUS.",
     historia: "Fundada em 1950 pelo médico Renato da Costa Bomfim e por pais de crianças com poliomielite, a AACD nasceu da necessidade de oferecer reabilitação especializada no Brasil. Ao longo de mais de 70 anos, expandiu sua atuação por meio de unidades próprias e do Programa de Saúde Itinerante (PSI), que leva atendimento a regiões remotas do país. É referência nacional e internacional em reabilitação física e inclusão social.",
     numeros: [
@@ -114,6 +116,7 @@ const ongDetalhes = {
     paises_atuacao: "Brasil",
     foto: fotoSenna,
     fotoCapa: fotoSenna,
+    mapa: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3656.9877628676218!2d-46.6929828248785!3d-23.568882978794637!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94ce570ab6420ae3%3A0x921ad9438ecd27f6!2sInstituto%20Ayrton%20Senna!5e0!3m2!1sen!2sbr!4v1789688312667!5m2!1sen!2sbr",
     sobre: "O Instituto Ayrton Senna é uma organização sem fins lucrativos dedicada a transformar a educação pública brasileira. Desenvolve soluções educacionais em parceria com governos estaduais e municipais, focando na melhoria da aprendizagem, na formação de professores e na garantia do direito de crianças e jovens a uma educação de qualidade.",
     historia: "Fundado em 1994 por Viviane Senna, irmã do tricampeão mundial de Fórmula 1 Ayrton Senna, em homenagem ao piloto falecido naquele ano. Desde sua criação, o instituto já beneficiou mais de 25 milhões de estudantes em todo o Brasil. Atua em parceria com secretarias de educação de estados e municípios, desenvolvendo programas de alfabetização, ensino médio e educação integral.",
     numeros: [
@@ -203,6 +206,20 @@ function Ong() {
               <a href={d.site} target="_blank" rel="noopener noreferrer" className="ong-site-link">
                 {d.site} ↗
               </a>
+            </div>
+          )}
+          {d.mapa && (
+            <div className="ong-detalhe-secao ong-localizacao">
+              <h2>Localização</h2>
+              <div className="ong-mapa">
+                <iframe
+                  src={d.mapa}
+                  title={`Mapa da ${selecionada.nome}`}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                />
+              </div>
             </div>
           )}
         </div>

@@ -95,7 +95,9 @@ const Faq = () => {
 
   return (
     <div className="faq-page">
-      <AuroraBg />
+      <div className="faq-bg">
+        <AuroraBg />
+      </div>
       <div className="faq-container">
 
         <h2 className="faq-title">Perguntas Frequentes</h2>
