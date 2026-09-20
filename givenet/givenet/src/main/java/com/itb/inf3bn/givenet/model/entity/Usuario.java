@@ -1,6 +1,7 @@
 package com.itb.inf3bn.givenet.model.entity;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 @Entity
@@ -25,6 +26,7 @@ public class Usuario {
     private String email;
 
     @Column(length = 255, nullable = false)
+    @JsonIgnore
     private String senha;
 
     @Column(length = 20, nullable = true)

@@ -25,7 +25,7 @@ function Perfil() {
         headers: { usuarioId: usuario.id },
       })
       .then(res => setDoacoes(res.data))
-      .catch(() => toast.error("❌ Erro ao carregar histórico de doações."));
+      .catch(() => toast.error("Erro ao carregar histórico de doações."));
   }, [usuario?.id, navigate]);
 
   if (!usuario) return null;
@@ -40,7 +40,7 @@ function Perfil() {
       const base64 = ev.target.result;
       setFoto(base64);
       localStorage.setItem(`foto_${usuario.id}`, base64);
-      toast.success("✅ Foto atualizada!");
+      toast.success("Foto atualizada!");
     };
     reader.readAsDataURL(file);
   };
@@ -49,7 +49,7 @@ function Perfil() {
     try {
       localStorage.removeItem("usuarioLogado");
     } catch {}
-    toast.success("✅ Você saiu com sucesso!");
+    toast.success("Você saiu com sucesso!");
     navigate("/login", { replace: true });
   };
 
@@ -66,7 +66,7 @@ function Perfil() {
               ? <img src={foto} alt="avatar" className="perfil-avatar perfil-avatar-img" />
               : <div className="perfil-avatar">{usuario.nome?.[0]?.toUpperCase() ?? "?"}</div>
             }
-            <div className="perfil-avatar-overlay">📷</div>
+            <div className="perfil-avatar-overlay">Alterar</div>
             <input id="input-foto" type="file" accept="image/*" style={{ display: "none" }} onChange={handleFotoChange} />
           </div>
           <div>
@@ -100,17 +100,17 @@ function Perfil() {
         </div>
 
         <div className="perfil-card">
-          <h2 className="perfil-section-title">📋 Histórico de Doações</h2>
+          <h2 className="perfil-section-title">Histórico de Doações</h2>
           {doacoes.length === 0 ? (
             <p className="perfil-vazio">Nenhuma doação registrada ainda.</p>
           ) : (
             <ul className="perfil-lista">
               {doacoes.map(d => (
                 <li key={d.id} className="perfil-doacao-item">
-                  <div className="perfil-doacao-ong">🏢 {d.ong?.nome ?? d.ong}</div>
+                  <div className="perfil-doacao-ong">{d.ong?.nome ?? d.ong}</div>
                   <div className="perfil-doacao-info">
-                    <span>🕒 {d.horario}h</span>
-                    <span>📅 {new Date(d.data).toLocaleDateString("pt-BR")}</span>
+                    <span>{d.horario}h</span>
+                    <span>{new Date(d.data).toLocaleDateString("pt-BR")}</span>
                   </div>
                 </li>
               ))}
@@ -120,7 +120,7 @@ function Perfil() {
 
         {ongs.length > 0 && (
           <div className="perfil-card">
-            <h2 className="perfil-section-title">💜 ONGs que você apoiou</h2>
+            <h2 className="perfil-section-title">ONGs que você apoiou</h2>
             <div className="perfil-ongs">
               {ongs.map(ong => (
                 <span key={ong} className="perfil-ong-tag">{ong}</span>

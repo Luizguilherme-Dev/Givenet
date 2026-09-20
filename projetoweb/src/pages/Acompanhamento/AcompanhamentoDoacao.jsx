@@ -11,7 +11,7 @@ export function CardAcompanhamento({ doacao, onConfirmar, podeConfirmar, confirm
   const isCancelado = status === "CANCELADO";
 
   const badgeClass = isEntregue ? "entregue" : isCancelado ? "cancelado" : "agendado";
-  const badgeLabel = isEntregue ? "✅ Entregue" : isCancelado ? "Cancelada" : "Registrada";
+  const badgeLabel = isEntregue ? "Entregue" : isCancelado ? "Cancelada" : "Registrada";
 
   const nomeOng = typeof doacao.ong === "object" ? doacao.ong?.nome : doacao.ong;
 
@@ -76,7 +76,6 @@ export function CardAcompanhamento({ doacao, onConfirmar, podeConfirmar, confirm
       {/* ── Bloco de entrega confirmada ── */}
       {isEntregue && dataEntregaFormatada && (
         <div className="acomp-entrega-confirmada">
-          <span className="acomp-entrega-icon">✅</span>
           <div className="acomp-entrega-info">
             <span className="acomp-entrega-label">Doação entregue confirmada em</span>
             <span className="acomp-entrega-data">{dataEntregaFormatada}</span>
@@ -134,7 +133,7 @@ export function CardAcompanhamento({ doacao, onConfirmar, podeConfirmar, confirm
               Confirmando...
             </span>
           ) : (
-            <span className="acomp-btn-inner">✅ Confirmar Entrega</span>
+            <span className="acomp-btn-inner">Confirmar Entrega</span>
           )}
         </button>
       )}
@@ -172,7 +171,7 @@ export function SkeletonAcompanhamento() {
 export function VazioAcompanhamento({ mensagem, sub }) {
   return (
     <div className="acomp-vazio">
-      <div className="acomp-vazio-icon">📦</div>
+      <div className="acomp-vazio-icon">Sem registros</div>
       <p className="acomp-vazio-texto">{mensagem || "Nenhuma doação encontrada"}</p>
       {sub && <p className="acomp-vazio-sub">{sub}</p>}
     </div>

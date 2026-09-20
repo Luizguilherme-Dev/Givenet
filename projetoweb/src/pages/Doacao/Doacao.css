@@ -1,16 +1,36 @@
-.page-wrapper {
+.page-wrapper.page-wrapper {
+  position: relative;
+  isolation: isolate;
   min-height: 100vh;
-  background: linear-gradient(160deg, #0a0010 0%, #1a0533 25%, #2d1060 50%, #1a0533 75%, #0a0010 100%);
+  background: linear-gradient(160deg, #0a0010 0%, #1a0533 25%, #2d1060 50%, #1a0533 75%, #0a0010 100%) !important;
+}
+
+.page-wrapper > .aurora-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.38;
+}
+
+.page-wrapper > .aurora-bg canvas {
+  display: block;
 }
 
 .page-content {
+  position: relative;
+  z-index: 1;
   padding: 80px 20px 60px;
+  width: 100%;
+  box-sizing: border-box;
+  animation: donation-content-in 0.65s ease-out both;
 }
 
 .cadastro-container {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 40px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 40px clamp(24px, 5vw, 72px);
+  box-sizing: border-box;
   background: rgba(255, 255, 255, 0.08) !important;
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 20px;
@@ -39,6 +59,16 @@
   gap: 20px;
 }
 
+.cadastro-form .form-group {
+  animation: donation-field-in 0.45s ease-out both;
+}
+
+.cadastro-form .form-group:nth-child(2) { animation-delay: 0.04s; }
+.cadastro-form .form-group:nth-child(3) { animation-delay: 0.08s; }
+.cadastro-form .form-group:nth-child(4) { animation-delay: 0.12s; }
+.cadastro-form .form-group:nth-child(5) { animation-delay: 0.16s; }
+.cadastro-form .form-group:nth-child(6) { animation-delay: 0.2s; }
+
 .form-group {
   display: flex;
   flex-direction: column;
@@ -52,6 +82,8 @@
 }
 
 .form-input {
+  width: 100%;
+  box-sizing: border-box;
   padding: 14px 18px !important;
   border: 1px solid rgba(255, 255, 255, 0.4) !important;
   border-radius: 12px !important;
@@ -143,6 +175,7 @@
   align-items: center;
   transition: all 0.3s ease;
   box-shadow: none !important;
+  animation: donation-card-in 0.45s ease-out both;
 }
 
 .pacientes-lista li:hover {
@@ -183,11 +216,13 @@
 .tabs {
   display: flex;
   gap: 12px;
-  justify-content: center;
+  width: 100%;
   margin: 20px 0 10px;
 }
 
 .tab-btn {
+  flex: 1;
+  min-width: 0;
   padding: 12px 18px !important;
   background: rgba(255, 255, 255, 0.1) !important;
   border: 1px solid rgba(255, 255, 255, 0.25) !important;
@@ -251,6 +286,23 @@
   box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
 }
 
+.ong-chip,
+.tab-btn,
+.horario-preview {
+  background: linear-gradient(135deg, rgba(126, 58, 237, 0.38), rgba(168, 85, 247, 0.22));
+  border-color: rgba(216, 180, 254, 0.42);
+  color: #f3e8ff;
+  transition: transform .25s ease, background .25s ease, box-shadow .25s ease;
+}
+
+.ong-chip:hover,
+.tab-btn:hover,
+.horario-preview:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, rgba(126, 58, 237, 0.68), rgba(168, 85, 247, 0.42)) !important;
+  box-shadow: 0 8px 20px rgba(168, 85, 247, .24);
+}
+
 .ong-chip-ocupado {
   background: rgba(255, 255, 255, 0.04) !important;
   border-color: rgba(255, 255, 255, 0.1) !important;
@@ -262,7 +314,7 @@
 
 /* ===== RESPONSIVO ===== */
 @media (max-width: 768px) {
-  .cadastro-container { padding: 30px 20px; margin: 0 15px; }
+  .cadastro-container { padding: 30px 20px; margin: 0; }
   .cadastro-title { font-size: 1.75rem; }
   .pacientes-lista li { flex-direction: column; align-items: flex-start; gap: 15px; }
   .btn-deletar { width: 100%; }
@@ -401,4 +453,27 @@
 
 @keyframes modal-spin {
   to { transform: rotate(360deg); }
+}
+
+@keyframes donation-content-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes donation-field-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes donation-card-in {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-content,
+  .cadastro-form .form-group,
+  .pacientes-lista li {
+    animation: none;
+  }
 }

@@ -63,6 +63,15 @@ export interface DoacaoDTO {
   itensTipo?: string;
 }
 
+export interface DoacaoStatusHistory {
+  id?: number;
+  doacaoId: number;
+  statusAnterior?: string;
+  statusNovo: string;
+  alteradoPorUsuarioId?: number;
+  dataHora?: string;
+}
+
 export interface ChatMessage {
   id: number;
   usuario: 'paciente' | 'sistema' | 'usuario' | string;

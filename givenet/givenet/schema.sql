@@ -51,7 +51,7 @@ CREATE TABLE doacao (
     id                        BIGINT IDENTITY(1,1) PRIMARY KEY,
     nome                      VARCHAR(100) NOT NULL,
     email                     VARCHAR(150) NOT NULL,
-    horario                   VARCHAR(10)  NOT NULL,
+    horario                   VARCHAR(20)  NOT NULL,
     data                      VARCHAR(50),
     usuario_id                BIGINT       NOT NULL,
     ong_id                    BIGINT       NOT NULL,

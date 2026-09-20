@@ -29,7 +29,7 @@ const ChatPreConsulta = () => {
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
     } catch (error) {
       console.error("Erro ao carregar mensagens", error);
-      toast.error("❌ Erro ao carregar mensagens.");
+      toast.error("Erro ao carregar mensagens.");
     }
   }, []);
 
@@ -64,7 +64,7 @@ const ChatPreConsulta = () => {
       await fetchMensagens();
     } catch (error) {
       console.error("Erro ao enviar mensagem", error);
-      toast.error("❌ Erro ao enviar mensagem.");
+      toast.error("Erro ao enviar mensagem.");
     } finally {
       setCarregando(false);
     }
@@ -84,7 +84,7 @@ const ChatPreConsulta = () => {
       </div>
       <div className="container border rounded p-3 chat-container">
         <h3 className="mb-3 text-center chat-title">
-          💜 Assistente Give Net
+          Assistente Give Net
         </h3>
 
         <div className="flex-grow-1 overflow-auto mb-3 p-3 rounded chat-messages">
@@ -100,7 +100,7 @@ const ChatPreConsulta = () => {
             >
               <div className={`p-3 rounded shadow-sm message-bubble ${usuario === "paciente" ? "user" : "system"}`}>
                 <small style={{ fontWeight: "600", opacity: 0.8 }}>
-                  {usuario === "paciente" ? "Você" : "🤖 Assistente Give Net"}
+                  {usuario === "paciente" ? "Você" : "Assistente Give Net"}
                 </small>
                 <p className="mb-1" style={{ marginTop: 6, lineHeight: "1.4rem" }}>
                   {mensagem}
@@ -114,7 +114,7 @@ const ChatPreConsulta = () => {
           {carregando && (
             <div className="d-flex justify-content-start mb-3">
               <div className="p-3 rounded message-bubble system">
-                <small style={{ fontWeight: "600", opacity: 0.8 }}>🤖 Assistente Give Net</small>
+                <small style={{ fontWeight: "600", opacity: 0.8 }}>Assistente Give Net</small>
                 <p className="mb-0 mt-1" style={{ opacity: 0.7 }}>Digitando...</p>
               </div>
             </div>

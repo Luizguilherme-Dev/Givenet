@@ -15,9 +15,9 @@ import fotoAACD from '../img/aacd.png';
 
 const ongDetalhes = {
   "WWF Brasil": {
-    icon: "🐼",
-    cor: "#15803d",
-    corClara: "#dcfce7",
+    icon: "WWF",
+    cor: "#5227ff",
+    corClara: "#d8b4fe",
     fundacao: "1961",
     pais: "Internacional",
     sede: "Brasília, DF",
@@ -38,9 +38,9 @@ const ongDetalhes = {
     atuacao: ["Conservação da Amazônia", "Cerrado e Pantanal", "Mudanças climáticas", "Oceanos", "Espécies ameaçadas", "Desenvolvimento sustentável"],
   },
   "Greenpeace Brasil": {
-    icon: "🌿",
-    cor: "#16a34a",
-    corClara: "#f0fdf4",
+    icon: "GP",
+    cor: "#7c3aed",
+    corClara: "#e9d5ff",
     fundacao: "1971",
     pais: "Internacional",
     sede: "São Paulo, SP",
@@ -60,9 +60,9 @@ const ongDetalhes = {
     atuacao: ["Proteção da Amazônia", "Energia renovável", "Oceanos", "Agrotóxicos", "Clima", "Desmatamento zero"],
   },
   "Cáritas Brasileira": {
-    icon: "🤝",
-    cor: "#dc2626",
-    corClara: "#fee2e2",
+    icon: "CB",
+    cor: "#6d28d9",
+    corClara: "#ddd6fe",
     fundacao: "1956",
     pais: "Brasil",
     sede: "Brasília, DF",
@@ -82,9 +82,9 @@ const ongDetalhes = {
     atuacao: ["Segurança alimentar", "Migrantes e refugiados", "Geração de renda", "Desastres socioambientais", "Direitos humanos", "Povos tradicionais"],
   },
   "AACD": {
-    icon: "🦽",
-    cor: "#0369a1",
-    corClara: "#e0f2fe",
+    icon: "AACD",
+    cor: "#8b5cf6",
+    corClara: "#ede9fe",
     fundacao: "1950",
     pais: "Brasil",
     sede: "São Paulo, SP",
@@ -105,9 +105,9 @@ const ongDetalhes = {
     atuacao: ["Paralisia cerebral", "Lesão medular", "Amputações", "Malformações congênitas", "Reabilitação física", "Inclusão social"],
   },
   "Instituto Ayrton Senna": {
-    icon: "🏎️",
-    cor: "#7c3aed",
-    corClara: "#ede9fe",
+    icon: "IAS",
+    cor: "#a855f7",
+    corClara: "#f3e8ff",
     fundacao: "1994",
     pais: "Brasil",
     sede: "São Paulo, SP",
@@ -136,7 +136,7 @@ function Ong() {
   useEffect(() => {
     axios.get("http://localhost:8080/ongs")
       .then((res) => setOngs(res.data))
-      .catch((err) => { console.error("Erro ao buscar ONGs", err); toast.error("❌ Erro ao carregar ONGs."); });
+      .catch((err) => { console.error("Erro ao buscar ONGs", err); toast.error("Erro ao carregar ONGs."); });
   }, []);
 
   if (selecionada) {
@@ -159,12 +159,12 @@ function Ong() {
             <div className="ong-detalhe-hero-texto">
               <h1>{selecionada.nome}</h1>
               <div className="ong-detalhe-meta">
-                {d.fundacao   && <span>📅 Fundada em {d.fundacao}</span>}
-                {d.pais       && <span>🌍 {d.pais}</span>}
-                {d.sede       && <span>📍 {d.sede}</span>}
-                {d.funcionarios && <span>👥 {d.funcionarios}</span>}
-                {selecionada.email    && <span>✉️ {selecionada.email}</span>}
-                {selecionada.telefone && <span>📞 {selecionada.telefone}</span>}
+                {d.fundacao   && <span>Fundada em {d.fundacao}</span>}
+                {d.pais       && <span>{d.pais}</span>}
+                {d.sede       && <span>{d.sede}</span>}
+                {d.funcionarios && <span>{d.funcionarios}</span>}
+                {selecionada.email    && <span>{selecionada.email}</span>}
+                {selecionada.telefone && <span>{selecionada.telefone}</span>}
               </div>
             </div>
           </div>
@@ -261,17 +261,17 @@ function Ong() {
                   />
                 ) : null}
                 <div className="ong-card-icon" style={{ display: d.foto ? 'none' : 'flex' }}>
-                  {d.icon || "🏢"}
+                  {d.icon || "ONG"}
                 </div>
               </div>
               <div className="ong-card-direita">
                 <div>
                   <h2>{ong.nome}</h2>
                   <div className="ong-card-badges">
-                    {d.fundacao && <span className="ong-badge">📅 Desde {d.fundacao}</span>}
-                    {d.pais     && <span className="ong-badge">🌍 {d.pais}</span>}
-                    {d.sede     && <span className="ong-badge">📍 {d.sede}</span>}
-                    {d.funcionarios && <span className="ong-badge">👥 {d.funcionarios}</span>}
+                    {d.fundacao && <span className="ong-badge">Desde {d.fundacao}</span>}
+                    {d.pais     && <span className="ong-badge">{d.pais}</span>}
+                    {d.sede     && <span className="ong-badge">{d.sede}</span>}
+                    {d.funcionarios && <span className="ong-badge">{d.funcionarios}</span>}
                   </div>
                   <p className="ong-card-sobre">{d.sobre || "Clique para saber mais."}</p>
                 </div>

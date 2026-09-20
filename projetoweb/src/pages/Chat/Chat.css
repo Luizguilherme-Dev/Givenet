@@ -48,6 +48,17 @@
   white-space: pre-wrap;
   word-wrap: break-word;
   border-radius: 16px;
+  background: linear-gradient(135deg, rgba(91, 33, 182, 0.92), rgba(124, 58, 237, 0.86));
+  border: 1px solid rgba(216, 180, 254, 0.42);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(82, 39, 255, 0.2);
+  animation: chat-bubble-in 0.35s ease-out both;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.message-bubble:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(168, 85, 247, 0.3);
 }
 
 .chat-textarea {
@@ -82,6 +93,15 @@
 
 .chat-button:hover {
   background: rgba(255, 255, 255, 0.3) !important;
+}
+
+@keyframes chat-bubble-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .message-bubble { animation: none; }
 }
 
 @media (max-width: 768px) {

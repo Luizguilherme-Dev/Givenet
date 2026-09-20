@@ -18,17 +18,17 @@ function Cadastro() {
     e.preventDefault();
 
     if (!nome || !email || !senha || !telefone) {
-      toast.warning("⚠️ Por favor, preencha todos os campos.");
+      toast.warning("Por favor, preencha todos os campos.");
       return;
     }
 
     if (senha !== confirmarSenha) {
-      toast.error("❌ As senhas não coincidem!");
+      toast.error("As senhas não coincidem!");
       return;
     }
 
     if (senha.length < 6) {
-      toast.warning("⚠️ A senha deve ter no mínimo 6 caracteres.");
+      toast.warning("A senha deve ter no mínimo 6 caracteres.");
       return;
     }
 
@@ -40,7 +40,7 @@ function Cadastro() {
         telefone,
       }, { withCredentials: true });
 
-      toast.success("✅ Cadastro realizado com sucesso!", {
+      toast.success("Cadastro realizado com sucesso!", {
         position: "top-center",
         autoClose: 1500,
       });
@@ -50,7 +50,7 @@ function Cadastro() {
       }, 1600);
     } catch (error) {
       console.error("Erro ao cadastrar usuário:", error);
-      toast.error("❌ Erro ao cadastrar. Tente novamente.", {
+      toast.error("Erro ao cadastrar. Tente novamente.", {
         position: "top-center",
       });
     }

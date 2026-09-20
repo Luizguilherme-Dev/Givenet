@@ -74,7 +74,7 @@ function ModalConfirmarEntrega({ onConfirmar, onCancelar, loading }) {
                 <span className="modal-spinner" />
                 Confirmando...
               </span>
-            ) : "✅ Confirmar"}
+            ) : "Confirmar"}
           </button>
         </div>
       </div>
@@ -142,11 +142,14 @@ const Doacao = () => {
         await axios.put(`http://localhost:8080/doacoes/${editandoId}`, payload, {
           headers: { usuarioId: usuarioLogado?.id },
         });
-        toast.success("✅ Doação atualizada com sucesso!");
+        toast.success("Doação atualizada com sucesso!");
         setEditandoId(null);
       } else {
-        await axios.post("http://localhost:8080/doacoes", payload, { withCredentials: true });
-        toast.success("✅ Doação registrada com sucesso!");
+        await axios.post("http://localhost:8080/doacoes", payload, {
+          withCredentials: true,
+          headers: { usuarioId: usuarioLogado?.id },
+        });
+        toast.success("Doação registrada com sucesso!");
       }
       setOng("");
       setHorario("");
@@ -155,7 +158,7 @@ const Doacao = () => {
       setAba("agendamentos");
     } catch (err) {
       const msg = err.response?.data?.message || err.response?.data || "Erro ao salvar doação.";
-      toast.error(`❌ ${msg}`);
+      toast.error(msg);
     }
   };
 
@@ -185,10 +188,10 @@ const Doacao = () => {
       await axios.delete(`http://localhost:8080/doacoes/${id}`, {
         headers: { usuarioId: usuarioLogado?.id },
       });
-      toast.success("🗑️ Doação deletada com sucesso!");
+      toast.success("Doação deletada com sucesso!");
       fetchDoacoes();
     } catch (err) {
-      toast.error("❌ Não foi possível deletar esta doação.");
+      toast.error("Não foi possível deletar esta doação.");
     }
   };
 
@@ -202,12 +205,12 @@ const Doacao = () => {
         {},
         { withCredentials: true, params: { pin } }
       );
-      toast.success("✅ Entrega confirmada com sucesso!");
+      toast.success("Entrega confirmada com sucesso!");
       setModalDoacaoId(null);
       fetchDoacoes();
     } catch (err) {
       const msg = err.response?.data?.message || err.response?.data || "Erro ao confirmar entrega.";
-      toast.error(`❌ ${msg}`);
+      toast.error(msg);
     } finally {
       setConfirmando(null);
     }
@@ -240,8 +243,8 @@ const Doacao = () => {
               className="btn-cadastrar"
               style={{
                 marginBottom: 8,
-                background: "rgba(34,197,94,0.18)",
-                borderColor: "rgba(34,197,94,0.4)",
+                background: "rgba(168,85,247,0.18)",
+                borderColor: "rgba(168,85,247,0.4)",
                 color: "#4ade80",
                 fontSize: "1rem",
               }}
@@ -426,13 +429,13 @@ const Doacao = () => {
                             className="btn-cadastrar"
                             style={{
                               padding: "6px 14px", fontSize: 12,
-                              background: "rgba(34,197,94,0.18)",
-                              borderColor: "rgba(34,197,94,0.4)",
+                              background: "rgba(168,85,247,0.18)",
+                              borderColor: "rgba(168,85,247,0.4)",
                               color: "#4ade80",
                             }}
                             disabled={confirmando === doacao.id}
                           >
-                            {confirmando === doacao.id ? "..." : "✅ Confirmar"}
+                            {confirmando === doacao.id ? "..." : "Confirmar"}
                           </button>
                         )}
                       </div>

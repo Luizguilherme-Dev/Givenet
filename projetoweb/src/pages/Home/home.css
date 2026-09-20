@@ -88,8 +88,9 @@
 }
 
 .btn-primary:hover {
+  background: linear-gradient(135deg, #8b5cf6, #c084fc);
   box-shadow: 0 8px 32px rgba(124, 58, 237, 0.7);
-  opacity: 0.9;
+  opacity: 1;
 }
 
 .btn-outline {
@@ -105,8 +106,10 @@
 }
 
 .btn-outline:hover {
-  border-color: #e9d5ff;
+  background: rgba(124, 58, 237, 0.3);
+  border-color: #ffffff;
   color: #fff;
+  box-shadow: 0 8px 26px rgba(124, 58, 237, 0.35);
 }
 
 /* ===== IMPACTO ===== */
@@ -274,7 +277,8 @@
 
 .home-ong-card:hover {
   background: rgba(255, 255, 255, 0.09);
-  border-color: var(--cor);
+  border-color: #a855f7;
+  box-shadow: 0 10px 28px rgba(124, 58, 237, 0.24);
 }
 
 .home-ong-icon {
@@ -310,7 +314,7 @@
 }
 
 .home-ong-btn {
-  background: var(--cor);
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
   color: #fff;
   padding: 8px 20px;
   border-radius: 999px;

@@ -2,6 +2,7 @@
 import { BrowserRouter, Routes, Route, Outlet, Navigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "./notifications.css";
 
 // Import do menu (Navbar)
 import Navbar from "./pages/Header/Navbar";
@@ -71,7 +72,7 @@ function RotaAdmin({ children }) {
   const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado"));
   const isAdmin = usuarioLogado?.role === "ROLE_ADMIN" || usuarioLogado?.role === "ADMIN";
   if (!isAdmin) {
-    toast.warning("⚠️ Acesso restrito a administradores.", { position: "top-center", toastId: "admin-negado" });
+    toast.warning("Acesso restrito a administradores.", { position: "top-center", toastId: "admin-negado" });
     return <Navigate to="/" replace />;
   }
   return children;
@@ -80,7 +81,7 @@ function RotaAdmin({ children }) {
 function RotaPrivada({ children }) {
   const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado"));
   if (!usuarioLogado?.id) {
-    toast.warning("⚠️ Você precisa estar logado para registrar uma doação.", {
+    toast.warning("Você precisa estar logado para registrar uma doação.", {
       position: "top-center",
       toastId: "acesso-negado",
     });

@@ -95,7 +95,12 @@ public class DoacaoController {
     }
 
     @PostMapping
-    public Doacao criar(@RequestBody DoacaoDTO dto) {
+    public Doacao criar(@RequestHeader("usuarioId") Long usuarioId,
+                        @RequestBody DoacaoDTO dto) {
+        if (dto.getUsuarioId() == null || !usuarioId.equals(dto.getUsuarioId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Usuário da doação inválido");
+        }
+
         Ong ong = ongRepository.findById(dto.getOngId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "ONG não encontrada"));
 

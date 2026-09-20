@@ -3,7 +3,7 @@
   display: grid;
   place-items: center;
   padding: 32px 16px;
-  background: #071d1b;
+  background: linear-gradient(160deg, #0a0010, #1a0533 52%, #2d1060);
 }
 
 .solicitacao-form {
@@ -13,28 +13,30 @@
   padding: 32px;
   position: relative;
   z-index: 1;
-  border: 1px solid rgba(167, 243, 208, .24);
+  border: 1px solid rgba(216, 180, 254, .28);
   border-radius: 16px;
-  background: rgba(6, 31, 28, .88);
-  color: #ecfdf5;
+  background: rgba(52, 20, 92, .82);
+  color: #fff;
 }
 
 .solicitacao-form h1 { margin: 0; }
-.solicitacao-form p { color: #a7f3d0; margin: 0 0 8px; }
+.solicitacao-form p { color: #eadcff; margin: 0 0 8px; }
 .solicitacao-form input {
-  border: 1px solid rgba(167, 243, 208, .3);
+  border: 1px solid rgba(216, 180, 254, .34);
   border-radius: 8px;
   padding: 12px;
-  background: #0b2925;
-  color: #ecfdf5;
+  background: rgba(255, 255, 255, .1);
+  color: #fff;
 }
 .solicitacao-form button {
   border: 0;
   border-radius: 8px;
   padding: 12px;
-  background: #34d399;
-  color: #052e2b;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: #fff;
   font-weight: 700;
   cursor: pointer;
 }
-.solicitacao-form a { color: #a7f3d0; text-align: center; }
+.solicitacao-form a { color: #f3e8ff; text-align: center; }
+.solicitacao-form button { transition: transform .25s ease, box-shadow .25s ease; }
+.solicitacao-form button:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(168, 85, 247, .3); }

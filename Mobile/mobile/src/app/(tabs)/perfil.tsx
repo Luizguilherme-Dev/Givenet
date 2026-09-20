@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Alert,
   RefreshControl,
+  TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,10 +21,16 @@ import { ModalServerConfig } from '@/components/ModalServerConfig';
 
 export default function PerfilScreen() {
   const router = useRouter();
-  const { usuario, isAuthenticated, isAdmin, isOng, logout } = useAuth();
+  const { usuario, isAuthenticated, isAdmin, isOng, logout, atualizarPerfil } = useAuth();
   const [doacoes, setDoacoes] = useState<Doacao[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [serverModalVisible, setServerModalVisible] = useState(false);
+  const [editandoPerfil, setEditandoPerfil] = useState(false);
+  const [nomeEditado, setNomeEditado] = useState('');
+  const [telefoneEditado, setTelefoneEditado] = useState('');
+  const [senhaAtual, setSenhaAtual] = useState('');
+  const [novaSenha, setNovaSenha] = useState('');
+  const [salvandoPerfil, setSalvandoPerfil] = useState(false);
 
   const carregarDados = async () => {
     if (!usuario?.id) return;
@@ -55,6 +63,37 @@ export default function PerfilScreen() {
         },
       },
     ]);
+  };
+
+  const iniciarEdicao = () => {
+    setNomeEditado(usuario?.nome || '');
+    setTelefoneEditado(usuario?.telefone || '');
+    setSenhaAtual('');
+    setNovaSenha('');
+    setEditandoPerfil(true);
+  };
+
+  const salvarPerfil = async () => {
+    if (!nomeEditado.trim() || !senhaAtual) {
+      Alert.alert('Atenção', 'Informe o nome e a senha atual para salvar.');
+      return;
+    }
+
+    setSalvandoPerfil(true);
+    try {
+      await atualizarPerfil({
+        nome: nomeEditado.trim(),
+        telefone: telefoneEditado.trim(),
+        senhaAtual,
+        novaSenha: novaSenha || undefined,
+      });
+      setEditandoPerfil(false);
+      Alert.alert('Sucesso', 'Perfil atualizado com sucesso.');
+    } catch (err: any) {
+      Alert.alert('Erro', err.message || 'Não foi possível atualizar o perfil.');
+    } finally {
+      setSalvandoPerfil(false);
+    }
   };
 
   // ONGs únicas apoiadas
@@ -99,9 +138,53 @@ export default function PerfilScreen() {
               </View>
 
               <View style={styles.userInfoCol}>
-                <Text style={styles.userName}>{usuario?.nome}</Text>
+                {editandoPerfil ? (
+                  <>
+                    <TextInput
+                      style={styles.profileInput}
+                      value={nomeEditado}
+                      onChangeText={setNomeEditado}
+                      placeholder="Nome"
+                      placeholderTextColor={GiveNetTheme.textPlaceholder}
+                    />
+                    <TextInput
+                      style={styles.profileInput}
+                      value={telefoneEditado}
+                      onChangeText={setTelefoneEditado}
+                      placeholder="Telefone"
+                      placeholderTextColor={GiveNetTheme.textPlaceholder}
+                      keyboardType="phone-pad"
+                    />
+                    <TextInput
+                      style={styles.profileInput}
+                      value={senhaAtual}
+                      onChangeText={setSenhaAtual}
+                      placeholder="Senha atual"
+                      placeholderTextColor={GiveNetTheme.textPlaceholder}
+                      secureTextEntry
+                    />
+                    <TextInput
+                      style={styles.profileInput}
+                      value={novaSenha}
+                      onChangeText={setNovaSenha}
+                      placeholder="Nova senha (opcional)"
+                      placeholderTextColor={GiveNetTheme.textPlaceholder}
+                      secureTextEntry
+                    />
+                    <View style={styles.profileActions}>
+                      <TouchableOpacity style={styles.profileCancelButton} onPress={() => setEditandoPerfil(false)}>
+                        <Text style={styles.profileCancelText}>Cancelar</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.profileSaveButton} onPress={salvarPerfil} disabled={salvandoPerfil}>
+                        {salvandoPerfil ? <ActivityIndicator size="small" color="#FFFFFF" /> : <Text style={styles.profileSaveText}>Salvar</Text>}
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                ) : (
+                  <Text style={styles.userName}>{usuario?.nome}</Text>
+                )}
                 <Text style={styles.userEmail}>{usuario?.email}</Text>
-                {usuario?.telefone && (
+                {!editandoPerfil && usuario?.telefone && (
                   <Text style={styles.userPhone}>📞 {usuario.telefone}</Text>
                 )}
 
@@ -111,6 +194,11 @@ export default function PerfilScreen() {
                   </Text>
                 </View>
               </View>
+              {!editandoPerfil && (
+                <TouchableOpacity style={styles.editProfileButton} onPress={iniciarEdicao}>
+                  <Ionicons name="create-outline" size={18} color={GiveNetTheme.primaryLight} />
+                </TouchableOpacity>
+              )}
             </View>
 
             {/* Estatísticas do Usuário */}
@@ -270,7 +358,7 @@ export default function PerfilScreen() {
 
         {/* Versão do Aplicativo */}
         <View style={styles.appVersionBox}>
-          <Text style={styles.appVersionText}>GiveNet Mobile • Versão 1.0.0 (Expo v57)</Text>
+          <Text style={styles.appVersionText}>GiveNet Mobile • Versão 1.0.0 (Expo v54)</Text>
           <Text style={styles.appVersionSub}>Backend Spring Boot • SQL Server</Text>
         </View>
       </ScrollView>
@@ -323,6 +411,56 @@ const styles = StyleSheet.create({
   },
   userInfoCol: {
     flex: 1,
+  },
+  editProfileButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: GiveNetTheme.cardSecondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileInput: {
+    height: 38,
+    backgroundColor: GiveNetTheme.inputBackground,
+    borderWidth: 1,
+    borderColor: GiveNetTheme.inputBorder,
+    borderRadius: 10,
+    color: GiveNetTheme.textPrimary,
+    paddingHorizontal: 10,
+    marginBottom: 6,
+    fontSize: 12,
+  },
+  profileActions: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 4,
+  },
+  profileCancelButton: {
+    flex: 1,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: GiveNetTheme.cardSecondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileCancelText: {
+    color: GiveNetTheme.textSecondary,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  profileSaveButton: {
+    flex: 1,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: GiveNetTheme.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileSaveText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
   },
   userName: {
     fontSize: 18,

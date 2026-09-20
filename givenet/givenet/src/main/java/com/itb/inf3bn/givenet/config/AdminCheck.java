@@ -22,7 +22,7 @@ public class AdminCheck {
         Optional<Usuario> usuario = repository.findByEmail(email);
         if (usuario.isEmpty()
                 || !encoder.matches(senha, usuario.get().getSenha())
-                || !"ADMIN".equals(usuario.get().getRole())) {
+                || !"ADMIN".equalsIgnoreCase(usuario.get().getRole())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado: apenas administradores podem realizar esta ação");
         }
     }

@@ -42,7 +42,7 @@ export const OngCard: React.FC<Props> = ({ ong, onDoarPress, onDetalhesPress }) 
           ]}
         >
           {ong.logo ? (
-            <Image source={ong.logo} style={styles.iconImage} resizeMode="contain" />
+            <Image source={ong.logo} style={styles.iconImage} resizeMode="cover" />
           ) : (
             <Text style={styles.iconText}>{ong.icon || '🏢'}</Text>
           )}
@@ -132,15 +132,15 @@ const styles = StyleSheet.create({
   iconWrapper: {
     width: 48,
     height: 48,
-    borderRadius: 14,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
   },
   iconImage: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
+    width: '100%',
+    height: '100%',
+    borderRadius: 24,
   },
   iconText: {
     fontSize: 24,

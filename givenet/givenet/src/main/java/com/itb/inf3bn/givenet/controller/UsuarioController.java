@@ -1,6 +1,7 @@
 package com.itb.inf3bn.givenet.controller;
 
 import com.itb.inf3bn.givenet.config.AdminCheck;
+import com.itb.inf3bn.givenet.dto.PerfilUsuarioDTO;
 import com.itb.inf3bn.givenet.dto.UsuarioDTO;
 import com.itb.inf3bn.givenet.model.entity.AuditLog;
 import com.itb.inf3bn.givenet.model.entity.Usuario;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -56,7 +58,41 @@ public class UsuarioController {
         usuario.setEmail(dto.getEmail());
         usuario.setSenha(encoder.encode(dto.getSenha()));
         usuario.setTelefone(dto.getTelefone());
-        usuario.setRole(dto.getRole() != null ? dto.getRole().toUpperCase() : "USER");
+        usuario.setRole("USER");
+        return repository.save(usuario);
+    }
+
+    @PutMapping("/{id}/perfil")
+    public Usuario atualizarPerfil(@PathVariable Long id,
+                                   @RequestHeader("usuarioId") Long solicitanteId,
+                                   @RequestBody PerfilUsuarioDTO dto) {
+        if (!id.equals(solicitanteId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado");
+        }
+
+        Usuario usuario = repository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+
+        if (dto.getSenhaAtual() == null || !encoder.matches(dto.getSenhaAtual(), usuario.getSenha())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Senha atual incorreta");
+        }
+
+        if (dto.getNome() == null || dto.getNome().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nome é obrigatório");
+        }
+
+        usuario.setNome(dto.getNome().trim());
+        usuario.setTelefone(dto.getTelefone());
+        if (dto.getNovaSenha() != null && !dto.getNovaSenha().isBlank()) {
+            usuario.setSenha(encoder.encode(dto.getNovaSenha()));
+        }
+
+        auditLogRepository.save(AuditLog.builder()
+                .usuarioId(id)
+                .acao("ATUALIZAR_PERFIL")
+                .detalhe("Usuário atualizou o próprio perfil")
+                .build());
+
         return repository.save(usuario);
     }
 
@@ -66,6 +102,7 @@ public class UsuarioController {
         String senha = credenciais.get("senha");
         Optional<Usuario> usuario = repository.findByEmail(email);
         if (usuario.isPresent() && encoder.matches(senha, usuario.get().getSenha())) {
+            usuario.get().setRole(usuario.get().getRole().toUpperCase());
             auditLogRepository.save(AuditLog.builder()
                     .usuarioId(usuario.get().getId())
                     .acao("LOGIN")

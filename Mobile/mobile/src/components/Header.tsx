@@ -52,7 +52,7 @@ export const Header: React.FC<{ title?: string; showBack?: boolean }> = ({
             >
               <View style={styles.logoBadge}>
                 <Image
-                  source={require('@/img/GiveNet.png')}
+                  source={require('@/img/GivenetLogo.jpg')}
                   style={styles.logoImage}
                   resizeMode="contain"
                 />
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   logoBadge: {
     width: 34,
     height: 34,
-    borderRadius: 10,
+    borderRadius: 17,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   logoImage: {
     width: 30,
     height: 30,
-    borderRadius: 8,
+    borderRadius: 15,
   },
   brandTitle: {
     fontSize: 16,

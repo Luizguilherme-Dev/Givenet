@@ -19,7 +19,7 @@ const impacto = [
 const destaqueOngs = [
   { nome: "AACD",                    desc: "Reabilitação física gratuita para crianças e adultos.",             img: imgAACD,  cor: "#2563eb" },
   { nome: "Instituto Ayrton Senna",  desc: "Educação de qualidade para jovens em situação de vulnerabilidade.", img: imgSenna, cor: "#dc2626" },
-  { nome: "WWF Brasil",              desc: "Conservação da natureza e combate às mudanças climáticas.",         img: imgWWF,   cor: "#4d7c0f" },
+  { nome: "WWF Brasil",              desc: "Conservação da natureza e combate às mudanças climáticas.",         img: imgWWF,   cor: "#7c3aed" },
 ];
 
 

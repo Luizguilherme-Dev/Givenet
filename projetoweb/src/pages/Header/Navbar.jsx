@@ -14,10 +14,10 @@ const Navbar = () => {
       ]}
       displaySocials={false}
       displayItemNumbering
-      menuButtonColor="#e9d5ff"
-      openMenuButtonColor="#d8b4fe"
+      menuButtonColor="#ffffff"
+      openMenuButtonColor="#ffffff"
       changeMenuColorOnOpen
-      colors={["#1a0533", "#5227FF", "#7c3aed"]}
+      colors={["#B497CF", "#5227FF"]}
       logoUrl={Logo}
       accentColor="#5227FF"
     />

@@ -61,14 +61,14 @@ export default function ConfirmarDoacao() {
       <div className="conf-page">
         <AuroraBg />
         <div className="conf-container">
-          <p className="conf-negado">⛔ Acesso restrito a administradores.</p>
+          <p className="conf-negado">Acesso restrito a administradores.</p>
         </div>
       </div>
     );
   }
 
   const buscarDoacao = async () => {
-    if (!doacaoId) return toast.error("❌ Informe o ID da doação.");
+    if (!doacaoId) return toast.error("Informe o ID da doação.");
     setBuscando(true);
     setDoacao(null);
     setPin("");
@@ -81,12 +81,12 @@ export default function ConfirmarDoacao() {
         },
       });
       if (res.data.status === "CONCLUIDA" || res.data.status === "DOACAO_ENTREGUE") {
-        toast.warning("⚠️ Esta doação já foi confirmada.");
+        toast.warning("Esta doação já foi confirmada.");
         return;
       }
       setDoacao(res.data);
     } catch {
-      toast.error("❌ Doação não encontrada ou senha incorreta.");
+      toast.error("Doação não encontrada ou senha incorreta.");
     } finally {
       setBuscando(false);
     }
@@ -98,7 +98,7 @@ export default function ConfirmarDoacao() {
 
   const handleConfirmar = async () => {
     if (!doacao) return;
-    if (metodo === "pin" && !pinValido) return toast.error("❌ PIN incorreto.");
+    if (metodo === "pin" && !pinValido) return toast.error("PIN incorreto.");
 
     setProgresso("loading");
     try {
@@ -122,7 +122,7 @@ export default function ConfirmarDoacao() {
       setProgresso("idle");
       console.error("Erro confirmar:", err.response);
       const msg = err.response?.data?.message || err.response?.data || "Erro ao confirmar.";
-      toast.error(`❌ ${msg}`);
+      toast.error(msg);
     }
   };
 
@@ -191,10 +191,10 @@ export default function ConfirmarDoacao() {
 
                 <div className="conf-metodos">
                   <button className={`conf-metodo-btn ${metodo === "pin" ? "ativo" : ""}`} onClick={() => { setMetodo("pin"); setPin(""); }}>
-                    🔢 PIN
+                    PIN
                   </button>
                   <button className={`conf-metodo-btn ${metodo === "qr" ? "ativo" : ""}`} onClick={() => setMetodo("qr")}>
-                    📷 QR Code
+                    QR Code
                   </button>
                 </div>
 
@@ -203,7 +203,7 @@ export default function ConfirmarDoacao() {
                     <label className="conf-label">
                       Digite o PIN para confirmar
                       {pinErrado && <span className="conf-pin-erro"> — PIN incorreto</span>}
-                      {pinValido && <span className="conf-pin-ok"> — ✓ Correto</span>}
+                      {pinValido && <span className="conf-pin-ok"> — Correto</span>}
                     </label>
                     <PinDigits pinReal={doacao.pinConfirmacao} pinDigitado={pin} />
                     <input
@@ -237,7 +237,7 @@ export default function ConfirmarDoacao() {
                   ) : metodo === "qr" ? (
                     "Apresente o QR Code na ONG"
                   ) : (
-                    "✅ Confirmar Entrega"
+                    "Confirmar Entrega"
                   )}
                 </button>
               </>

@@ -24,7 +24,7 @@ public class Doacao {
     @Column(length = 150, nullable = false)
     private String email;
 
-    @Column(length = 10, nullable = false)
+    @Column(length = 20, nullable = false)
     private String horario;
 
     @Column(length = 50, nullable = true)

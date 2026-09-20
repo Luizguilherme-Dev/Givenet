@@ -66,7 +66,7 @@
 }
  
 .produto-status.ativo {
-  background-color: #4caf50;
+  background-color: #7c3aed;
   color: white;
 }
  
@@ -111,7 +111,7 @@
 .produto-preco {
   font-size: 1.8rem;
   font-weight: bold;
-  color: #2e7d32;
+  color: #c084fc;
 }
  
 /* Botão adicionar */

@@ -1,20 +1,35 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 import { Platform } from 'react-native';
-import { Usuario, Ong, Doacao, DoacaoDTO, ChatMessage } from '@/types';
+import { Usuario, Ong, Doacao, DoacaoDTO, DoacaoStatusHistory, ChatMessage } from '@/types';
 import { ONG_DETAILS } from '@/constants/data';
 
 const STORAGE_KEY_API_URL = '@givenet_api_url';
 
+const getExpoHost = (): string | null => {
+  const hostUri = Constants.expoConfig?.hostUri;
+  if (!hostUri) return null;
+
+  return hostUri.split(':')[0] || null;
+};
+
 // Endereço padrão inteligente
 export const getDefaultApiUrl = (): string => {
   if (Platform.OS === 'android') {
-    // Para emulador ou dispositivo na mesma rede
-    return 'http://192.168.10.6:8080';
+    // O host do Expo funciona no emulador e em aparelhos na mesma rede.
+    const expoHost = getExpoHost();
+    if (expoHost && expoHost !== 'localhost' && expoHost !== '127.0.0.1') {
+      return `http://${expoHost}:8080`;
+    }
+
+    // 10.0.2.2 aponta para localhost do host no emulador Android.
+    return 'http://10.0.2.2:8080';
   }
   if (Platform.OS === 'web') {
     return 'http://localhost:8080';
   }
-  return 'http://192.168.10.6:8080';
+  // iOS simulator
+  return 'http://localhost:8080';
 };
 
 export class ApiService {
@@ -25,10 +40,14 @@ export class ApiService {
     if (this.initialized) return;
     try {
       const saved = await AsyncStorage.getItem(STORAGE_KEY_API_URL);
-      if (saved) {
+      const defaultUrl = getDefaultApiUrl();
+      if (saved === 'http://192.168.10.6:8080') {
+        this.baseUrl = defaultUrl;
+        await AsyncStorage.setItem(STORAGE_KEY_API_URL, defaultUrl);
+      } else if (saved) {
         this.baseUrl = saved;
       } else {
-        this.baseUrl = getDefaultApiUrl();
+        this.baseUrl = defaultUrl;
       }
     } catch {
       this.baseUrl = getDefaultApiUrl();
@@ -144,6 +163,17 @@ export class ApiService {
     });
   }
 
+  public static async atualizarPerfil(
+    id: number,
+    data: { nome: string; telefone?: string; senhaAtual: string; novaSenha?: string }
+  ): Promise<Usuario> {
+    return this.request<Usuario>(`/usuarios/${id}/perfil`, {
+      method: 'PUT',
+      headers: { usuarioId: String(id) },
+      body: JSON.stringify(data),
+    });
+  }
+
   // ==== ONGS ====
   public static async getOngs(): Promise<Ong[]> {
     try {
@@ -195,6 +225,12 @@ export class ApiService {
   }
 
   // ==== DOAÇÕES ====
+  public static async getHistoricoStatus(doacaoId: number, usuarioId: number): Promise<DoacaoStatusHistory[]> {
+    return this.request<DoacaoStatusHistory[]>(`/doacoes/historico/${doacaoId}`, {
+      headers: { usuarioId: String(usuarioId) },
+    });
+  }
+
   public static async getDoacoesUsuario(usuarioId: number): Promise<Doacao[]> {
     return this.request<Doacao[]>(`/doacoes/usuario/${usuarioId}`, {
       headers: { usuarioId: String(usuarioId) },
@@ -210,6 +246,7 @@ export class ApiService {
   public static async criarDoacao(dto: DoacaoDTO): Promise<Doacao> {
     return this.request<Doacao>('/doacoes', {
       method: 'POST',
+      headers: { usuarioId: String(dto.usuarioId) },
       body: JSON.stringify(dto),
     });
   }

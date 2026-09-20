@@ -189,7 +189,7 @@
 
 .ong-card-saibamais {
   margin-left: auto;
-  background: var(--cor);
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
   color: #fff !important;
   padding: 8px 22px;
   border-radius: 999px;
@@ -201,6 +201,30 @@
 
 .ong-card-horizontal:hover .ong-card-saibamais {
   opacity: 0.85;
+}
+
+.ong-card-horizontal .ong-badge {
+  background: linear-gradient(135deg, rgba(126, 58, 237, 0.58), rgba(168, 85, 247, 0.34));
+  border-color: rgba(216, 180, 254, 0.55);
+  color: #f3e8ff;
+}
+
+.ong-card-horizontal .ong-badge:hover {
+  background: linear-gradient(135deg, rgba(126, 58, 237, 0.78), rgba(168, 85, 247, 0.54));
+  border-color: rgba(233, 213, 255, 0.75);
+  box-shadow: 0 6px 18px rgba(168, 85, 247, 0.28);
+}
+
+.ong-card-horizontal .ong-card-tag {
+  background: linear-gradient(135deg, rgba(126, 58, 237, 0.48), rgba(168, 85, 247, 0.28));
+  border-color: rgba(216, 180, 254, 0.5);
+  color: #f3e8ff;
+}
+
+.ong-card-horizontal .ong-card-tag:hover {
+  background: linear-gradient(135deg, rgba(126, 58, 237, 0.72), rgba(168, 85, 247, 0.48));
+  border-color: rgba(233, 213, 255, 0.72);
+  box-shadow: 0 6px 18px rgba(168, 85, 247, 0.26);
 }
 
 /* ===== TELA DE DETALHE ===== */
@@ -402,5 +426,108 @@
 
   .ong-lista-header h1 {
     font-size: 2rem;
+  }
+}
+
+/* Padrao visual roxo compartilhado */
+.ong-lista-header h1,
+.ong-lista-header p,
+.ong-card-horizontal h2,
+.ong-detalhe-hero-texto h1,
+.ong-detalhe-meta span,
+.ong-detalhe-secao p {
+  color: #fff;
+}
+
+.ong-lista-header p,
+.ong-card-sobre,
+.ong-numero-label,
+.ong-detalhe-secao p {
+  color: #eadcff;
+}
+
+.ong-card-horizontal,
+.ong-numero-card,
+.ong-detalhe-secao {
+  background: rgba(52, 20, 92, 0.62);
+  border-color: rgba(216, 180, 254, 0.24);
+  box-shadow: 0 16px 38px rgba(10, 0, 16, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.ong-card-horizontal:hover,
+.ong-numero-card:hover,
+.ong-detalhe-secao:hover {
+  transform: translateY(-5px);
+  border-color: rgba(216, 180, 254, 0.58);
+  box-shadow: 0 22px 48px rgba(82, 39, 255, 0.24);
+}
+
+.ong-badge,
+.ong-card-tag,
+.ong-detalhe-meta span,
+.ong-tag {
+  background: linear-gradient(135deg, rgba(126, 58, 237, 0.38), rgba(168, 85, 247, 0.22));
+  border: 1px solid rgba(216, 180, 254, 0.42);
+  color: #f3e8ff;
+  transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+}
+
+.ong-badge:hover,
+.ong-card-tag:hover,
+.ong-detalhe-meta span:hover,
+.ong-tag:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, rgba(126, 58, 237, 0.68), rgba(168, 85, 247, 0.42));
+  box-shadow: 0 6px 18px rgba(168, 85, 247, 0.22);
+}
+
+.ong-card-saibamais,
+.ong-site-link {
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: #fff !important;
+  border: 1px solid rgba(233, 213, 255, 0.5);
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.25);
+}
+
+.ong-card-saibamais:hover,
+.ong-site-link:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(168, 85, 247, 0.38);
+}
+
+.ong-detalhe-secao h2 {
+  color: #f3e8ff;
+}
+
+.ong-detalhe-page,
+.ong-lista-page {
+  animation: ong-page-in 0.55s ease-out both;
+}
+
+.ong-card-horizontal,
+.ong-numero-card,
+.ong-detalhe-secao {
+  animation: ong-card-in 0.5s ease-out both;
+}
+
+@keyframes ong-page-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ong-card-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ong-detalhe-page,
+  .ong-lista-page,
+  .ong-card-horizontal,
+  .ong-numero-card,
+  .ong-detalhe-secao {
+    animation: none;
   }
 }

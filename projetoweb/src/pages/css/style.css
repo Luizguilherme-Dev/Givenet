@@ -339,3 +339,119 @@ hr {
     border-radius: 8px;
     margin-bottom: 10px;
 }
+
+:root {
+    --ui-navy: #17324d;
+    --ui-navy-dark: #10263a;
+    --ui-teal: #167d83;
+    --ui-teal-dark: #11646a;
+    --ui-bg: #f3f6f8;
+    --ui-surface: #ffffff;
+    --ui-border: #d8e1e7;
+    --ui-text: #22313f;
+    --ui-muted: #657482;
+    --ui-focus: rgba(22, 125, 131, 0.2);
+}
+
+html {
+    background: var(--ui-bg);
+}
+
+body {
+    min-width: 320px;
+    padding: 0 0 40px;
+    background: var(--ui-bg);
+    color: var(--ui-text);
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+main {
+    min-height: calc(100vh - 64px);
+}
+
+.page-wrapper {
+    background: var(--ui-bg) !important;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button {
+    border: 1px solid var(--ui-teal);
+    border-radius: 6px;
+    background: var(--ui-teal);
+    color: #fff;
+    font-weight: 600;
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:hover {
+    background: var(--ui-teal-dark);
+    border-color: var(--ui-teal-dark);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid var(--ui-focus);
+    outline-offset: 1px;
+}
+
+input,
+select,
+textarea {
+    border: 1px solid var(--ui-border);
+    border-radius: 6px;
+    background: var(--ui-surface);
+    color: var(--ui-text);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--ui-teal);
+    box-shadow: 0 0 0 3px var(--ui-focus);
+    outline: none;
+}
+
+.app-container,
+.login-container,
+.cadastro-container,
+.consulta-container,
+.produto-card {
+    border: 1px solid var(--ui-border);
+    border-radius: 8px;
+    background: var(--ui-surface);
+    box-shadow: 0 8px 24px rgba(23, 50, 77, 0.08);
+}
+
+.login-container h2,
+.main-content {
+    color: var(--ui-navy);
+}
+
+.dashboard-card {
+    border-radius: 8px;
+    background: var(--ui-navy);
+    box-shadow: 0 8px 20px rgba(23, 50, 77, 0.14);
+}
+
+.dashboard-card:hover,
+.produto-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px rgba(23, 50, 77, 0.16);
+}
+
+.ong-badge,
+.ong-card-tag,
+.perfil-ong-tag {
+    border: 1px solid var(--ui-border);
+    border-radius: 999px;
+    background: #f7fafb;
+    color: var(--ui-navy);
+}

@@ -26,7 +26,7 @@ export const ModalServerConfig: React.FC<Props> = ({ visible, onClose }) => {
   const [statusMsg, setStatusMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
   const presets = [
-    { label: 'Wi-Fi Local (PC)', url: 'http://192.168.10.6:8080' },
+    { label: 'Wi-Fi Local (PC)', url: ApiService.getBaseUrl() },
     { label: 'Emulador Android', url: 'http://10.0.2.2:8080' },
     { label: 'Localhost / Web', url: 'http://localhost:8080' },
   ];

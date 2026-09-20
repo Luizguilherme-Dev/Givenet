@@ -16,10 +16,19 @@
 }
 
 .perfil-card {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(52, 20, 92, 0.62);
+  border: 1px solid rgba(216, 180, 254, 0.24);
   border-radius: 20px;
   padding: 28px 32px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.perfil-card:hover,
+.perfil-stat-card:hover,
+.perfil-doacao-item:hover {
+  transform: translateY(-3px);
+  border-color: rgba(216, 180, 254, 0.54);
+  box-shadow: 0 16px 34px rgba(82, 39, 255, 0.22);
 }
 
 .perfil-header-card {
@@ -123,8 +132,8 @@
 }
 
 .perfil-stat-card {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: linear-gradient(135deg, rgba(91, 33, 182, 0.68), rgba(168, 85, 247, 0.24));
+  border: 1px solid rgba(216, 180, 254, 0.3);
   border-radius: 16px;
   padding: 20px 16px;
   display: flex;
@@ -171,8 +180,8 @@
 }
 
 .perfil-doacao-item {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(91, 33, 182, 0.36);
+  border: 1px solid rgba(216, 180, 254, 0.22);
   border-radius: 12px;
   padding: 14px 18px;
   display: flex;
@@ -202,13 +211,19 @@
 }
 
 .perfil-ong-tag {
-  background: rgba(168, 85, 247, 0.3);
-  border: 1px solid rgba(168, 85, 247, 0.5);
-  color: #e9d5ff;
+  background: linear-gradient(135deg, rgba(126, 58, 237, 0.62), rgba(168, 85, 247, 0.3));
+  border: 1px solid rgba(216, 180, 254, 0.5);
+  color: #fff;
   padding: 6px 14px;
   border-radius: 999px;
   font-size: 0.85rem;
   font-weight: 500;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.perfil-ong-tag:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(168, 85, 247, 0.25);
 }
 
 @media (max-width: 600px) {

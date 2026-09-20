@@ -19,6 +19,12 @@ interface AuthContextData {
     role?: string;
   }) => Promise<Usuario>;
   logout: () => Promise<void>;
+  atualizarPerfil: (data: {
+    nome: string;
+    telefone?: string;
+    senhaAtual: string;
+    novaSenha?: string;
+  }) => Promise<Usuario>;
   atualizarFoto: (fotoUri: string) => Promise<void>;
   updateApiUrl: (url: string) => Promise<{ ok: boolean; message: string }>;
 }
@@ -94,6 +100,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await AsyncStorage.removeItem(STORAGE_KEY_USER);
   };
 
+  const atualizarPerfil = async (data: {
+    nome: string;
+    telefone?: string;
+    senhaAtual: string;
+    novaSenha?: string;
+  }): Promise<Usuario> => {
+    if (!usuario?.id) {
+      throw new Error('Usuário não autenticado');
+    }
+
+    const updatedUser = await ApiService.atualizarPerfil(usuario.id, data);
+    const userWithPhoto = { ...updatedUser, foto: usuario.foto };
+    setUsuario(userWithPhoto);
+    await AsyncStorage.setItem(STORAGE_KEY_USER, JSON.stringify(userWithPhoto));
+    return userWithPhoto;
+  };
+
   const atualizarFoto = async (fotoUri: string): Promise<void> => {
     if (!usuario) return;
     const updated = { ...usuario, foto: fotoUri };
@@ -129,6 +152,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         cadastrar,
         logout,
+        atualizarPerfil,
         atualizarFoto,
         updateApiUrl,
       }}

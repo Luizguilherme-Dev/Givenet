@@ -15,7 +15,7 @@ function Login() {
     e.preventDefault();
 
     if (!email || !senha) {
-      toast.warning("⚠️ Por favor, preencha todos os campos.");
+      toast.warning("Por favor, preencha todos os campos.");
       return;
     }
 
@@ -25,7 +25,7 @@ function Login() {
 
       localStorage.setItem("usuarioLogado", JSON.stringify(usuarioEncontrado));
 
-      toast.success(`✅ Bem-vindo, ${usuarioEncontrado.nome}!`, {
+      toast.success(`Bem-vindo, ${usuarioEncontrado.nome}!`, {
         position: "top-center",
         autoClose: 1500,
       });
@@ -35,10 +35,10 @@ function Login() {
       }, 1600);
     } catch (error) {
       if (error.response?.status === 401) {
-        toast.error("❌ Email ou senha incorretos!", { position: "top-center" });
+        toast.error("Email ou senha incorretos!", { position: "top-center" });
       } else {
         console.error("Erro ao verificar login:", error);
-        toast.error("❌ Erro ao conectar ao servidor.", { position: "top-center" });
+        toast.error("Erro ao conectar ao servidor.", { position: "top-center" });
       }
     }
   };

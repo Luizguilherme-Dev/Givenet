@@ -316,11 +316,6 @@
   padding: 12px 16px;
 }
 
-.acomp-entrega-icon {
-  font-size: 1.4rem;
-  flex-shrink: 0;
-}
-
 .acomp-entrega-info {
   display: flex;
   flex-direction: column;
