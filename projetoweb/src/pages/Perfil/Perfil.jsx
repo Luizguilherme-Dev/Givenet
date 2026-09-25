@@ -45,10 +45,16 @@ function Perfil() {
     reader.readAsDataURL(file);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     try {
+      await axios.post("http://localhost:8080/usuarios/logout");
+    } catch {
+      // O logout local deve ocorrer mesmo se o backend estiver indisponivel.
+    } finally {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
       localStorage.removeItem("usuarioLogado");
-    } catch {}
+    }
     toast.success("Você saiu com sucesso!");
     navigate("/login", { replace: true });
   };

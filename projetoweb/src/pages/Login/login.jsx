@@ -21,9 +21,10 @@ function Login() {
 
     try {
       const response = await axios.post("http://localhost:8080/usuarios/login", { email, senha }, { withCredentials: true });
-      const usuarioEncontrado = response.data;
-
-      localStorage.setItem("usuarioLogado", JSON.stringify(usuarioEncontrado));
+      const { access_token, refresh_token, usuario } = response.data;
+      localStorage.setItem("access_token", access_token);
+      localStorage.setItem("refresh_token", refresh_token);
+      localStorage.setItem("usuarioLogado", JSON.stringify(usuario));
 
       toast.success(`Bem-vindo, ${usuarioEncontrado.nome}!`, {
         position: "top-center",

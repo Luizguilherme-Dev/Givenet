@@ -5,6 +5,8 @@ import { Usuario, Ong, Doacao, DoacaoDTO, DoacaoStatusHistory, ChatMessage } fro
 import { ONG_DETAILS } from '@/constants/data';
 
 const STORAGE_KEY_API_URL = '@givenet_api_url';
+const STORAGE_KEY_ACCESS_TOKEN = '@givenet_access_token';
+const STORAGE_KEY_REFRESH_TOKEN = '@givenet_refresh_token';
 
 const getExpoHost = (): string | null => {
   const hostUri = Constants.expoConfig?.hostUri;
@@ -91,16 +93,21 @@ export class ApiService {
 
   private static async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    retry = true
   ): Promise<T> {
     await this.init();
     const url = `${this.baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
 
+    const accessToken = await AsyncStorage.getItem(STORAGE_KEY_ACCESS_TOKEN);
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       Accept: 'application/json',
       ...((options.headers as Record<string, string>) || {}),
     };
+    if (accessToken && !endpoint.startsWith('/usuarios/login') && !endpoint.startsWith('/usuarios/refresh')) {
+      headers.Authorization = `Bearer ${accessToken}`;
+    }
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
@@ -114,6 +121,25 @@ export class ApiService {
       clearTimeout(timeout);
 
       if (!response.ok) {
+        if (response.status === 401 && retry && !endpoint.startsWith('/usuarios/login') && !endpoint.startsWith('/usuarios/refresh')) {
+          const refreshToken = await AsyncStorage.getItem(STORAGE_KEY_REFRESH_TOKEN);
+          if (refreshToken) {
+            const refreshResponse = await fetch(`${this.baseUrl}/usuarios/refresh`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+              body: JSON.stringify({ refresh_token: refreshToken }),
+            });
+            if (refreshResponse.ok) {
+              const tokens = await refreshResponse.json();
+              await AsyncStorage.multiSet([
+                [STORAGE_KEY_ACCESS_TOKEN, tokens.access_token],
+                [STORAGE_KEY_REFRESH_TOKEN, tokens.refresh_token],
+              ]);
+              return this.request<T>(endpoint, options, false);
+            }
+          }
+          await AsyncStorage.multiRemove([STORAGE_KEY_ACCESS_TOKEN, STORAGE_KEY_REFRESH_TOKEN, '@givenet_usuario']);
+        }
         let errorText = '';
         try {
           const jsonErr = await response.json();
@@ -138,10 +164,23 @@ export class ApiService {
 
   // ==== AUTH & USUARIOS ====
   public static async login(email: string, senha: string): Promise<Usuario> {
-    return this.request<Usuario>('/usuarios/login', {
+    const result = await this.request<{ access_token: string; refresh_token: string; usuario: Usuario }>('/usuarios/login', {
       method: 'POST',
       body: JSON.stringify({ email, senha }),
     });
+    await AsyncStorage.multiSet([
+      [STORAGE_KEY_ACCESS_TOKEN, result.access_token],
+      [STORAGE_KEY_REFRESH_TOKEN, result.refresh_token],
+    ]);
+    return result.usuario;
+  }
+
+  public static async logout(): Promise<void> {
+    try {
+      await this.request<void>('/usuarios/logout', { method: 'POST' });
+    } finally {
+      await AsyncStorage.multiRemove([STORAGE_KEY_ACCESS_TOKEN, STORAGE_KEY_REFRESH_TOKEN, '@givenet_usuario']);
+    }
   }
 
   public static async cadastrar(data: {

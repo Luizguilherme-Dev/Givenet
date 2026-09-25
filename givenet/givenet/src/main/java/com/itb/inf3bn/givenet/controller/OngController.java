@@ -1,10 +1,10 @@
 package com.itb.inf3bn.givenet.controller;
 
-import com.itb.inf3bn.givenet.config.AdminCheck;
 import com.itb.inf3bn.givenet.dto.OngDTO;
 import com.itb.inf3bn.givenet.model.entity.Ong;
 import com.itb.inf3bn.givenet.repository.OngRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,7 +14,6 @@ import java.util.List;
 public class OngController {
 
     @Autowired private OngRepository repository;
-    @Autowired private AdminCheck adminCheck;
 
     @GetMapping
     public List<Ong> listar() {
@@ -27,28 +26,21 @@ public class OngController {
     }
 
     @PostMapping
-    public Ong criar(@RequestHeader("adminEmail") String email,
-                     @RequestHeader("adminSenha") String senha,
-                     @RequestBody OngDTO dto) {
-        adminCheck.verificar(email, senha);
+    @PreAuthorize("hasRole('ADMIN')")
+    public Ong criar(@RequestBody OngDTO dto) {
         return repository.save(toEntity(new Ong(), dto));
     }
 
     @PutMapping("/{id}")
-    public Ong atualizar(@PathVariable Long id,
-                         @RequestHeader("adminEmail") String email,
-                         @RequestHeader("adminSenha") String senha,
-                         @RequestBody OngDTO dto) {
-        adminCheck.verificar(email, senha);
+    @PreAuthorize("hasRole('ADMIN')")
+    public Ong atualizar(@PathVariable Long id, @RequestBody OngDTO dto) {
         Ong ong = repository.findById(id).orElseThrow();
         return repository.save(toEntity(ong, dto));
     }
 
     @DeleteMapping("/{id}")
-    public void deletar(@PathVariable Long id,
-                        @RequestHeader("adminEmail") String email,
-                        @RequestHeader("adminSenha") String senha) {
-        adminCheck.verificar(email, senha);
+    @PreAuthorize("hasRole('ADMIN')")
+    public void deletar(@PathVariable Long id) {
         repository.deleteById(id);
     }
 

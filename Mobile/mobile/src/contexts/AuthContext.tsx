@@ -97,7 +97,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async (): Promise<void> => {
     setUsuario(null);
-    await AsyncStorage.removeItem(STORAGE_KEY_USER);
+    await ApiService.logout();
   };
 
   const atualizarPerfil = async (data: {

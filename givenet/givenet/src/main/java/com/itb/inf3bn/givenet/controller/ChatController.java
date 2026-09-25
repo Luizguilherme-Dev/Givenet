@@ -1,11 +1,12 @@
 package com.itb.inf3bn.givenet.controller;
 
-import com.itb.inf3bn.givenet.config.AdminCheck;
 import com.itb.inf3bn.givenet.dto.ChatDTO;
 import com.itb.inf3bn.givenet.model.entity.Chat;
 import com.itb.inf3bn.givenet.repository.ChatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,9 +17,6 @@ public class ChatController {
 
     @Autowired
     private ChatRepository repository;
-
-    @Autowired
-    private AdminCheck adminCheck;
 
     @GetMapping
     public List<Chat> listar() {
@@ -31,20 +29,17 @@ public class ChatController {
     }
 
     @PostMapping
-    public Chat criar(@RequestBody ChatDTO dto) {
+    public Chat criar(@RequestBody ChatDTO dto, Authentication authentication) {
         Chat chat = new Chat();
-        chat.setUsuario(dto.getUsuario());
+        chat.setUsuario(String.valueOf(authentication.getPrincipal()));
         chat.setMensagem(dto.getMensagem());
         chat.setData(dto.getData());
         return repository.save(chat);
     }
 
     @PutMapping("/{id}")
-    public Chat atualizar(@PathVariable Long id,
-                          @RequestHeader("adminEmail") String email,
-                          @RequestHeader("adminSenha") String senha,
-                          @RequestBody ChatDTO dto) {
-        adminCheck.verificar(email, senha);
+    @PreAuthorize("hasRole('ADMIN')")
+    public Chat atualizar(@PathVariable Long id, @RequestBody ChatDTO dto) {
         Chat chat = repository.findById(id).orElseThrow();
         chat.setUsuario(dto.getUsuario());
         chat.setMensagem(dto.getMensagem());
@@ -53,10 +48,8 @@ public class ChatController {
     }
 
     @DeleteMapping("/{id}")
-    public void deletar(@PathVariable Long id,
-                        @RequestHeader("adminEmail") String email,
-                        @RequestHeader("adminSenha") String senha) {
-        adminCheck.verificar(email, senha);
+    @PreAuthorize("hasRole('ADMIN')")
+    public void deletar(@PathVariable Long id) {
         repository.deleteById(id);
     }
 }
