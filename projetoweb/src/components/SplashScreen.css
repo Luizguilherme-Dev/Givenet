@@ -87,7 +87,8 @@
 }
  
 .splash-btn:hover {
-  background: rgba(168, 85, 247, 0.2);
+  background: linear-gradient(135deg, #8b5cf6, #c084fc);
+  border-color: #c084fc;
   color: #fff;
   transform: translateY(-2px);
 }

@@ -36,6 +36,8 @@ function Login() {
     } catch (error) {
       if (error.response?.status === 401) {
         toast.error("Email ou senha incorretos!", { position: "top-center" });
+      } else if (error.response?.status === 403) {
+        toast.error("Esta conta foi bloqueada. Entre em contato com o suporte.", { position: "top-center" });
       } else {
         console.error("Erro ao verificar login:", error);
         toast.error("Erro ao conectar ao servidor.", { position: "top-center" });

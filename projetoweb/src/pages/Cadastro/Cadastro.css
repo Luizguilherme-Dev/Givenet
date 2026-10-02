@@ -4,7 +4,7 @@
   justify-content: center;
   min-height: 100vh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  padding: 20px;
+  padding: clamp(16px, 4vw, 48px);
   background: linear-gradient(135deg, #0a0010 0%, #1a0533 40%, #2d1060 70%, #0a0010 100%);
 }
 
@@ -12,35 +12,56 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 500px;
+  max-width: 780px;
 }
 
 .cadastro-form {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 50px 40px;
-  border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(82, 39, 255, 0.3);
+  background:
+    radial-gradient(120% 90% at 12% 0%, rgba(124, 58, 237, 0.16), transparent 58%),
+    linear-gradient(160deg, rgba(30, 12, 54, 0.82) 0%, rgba(14, 5, 28, 0.88) 100%);
+  border: 1px solid rgba(167, 139, 250, 0.24);
+  padding: clamp(28px, 5vw, 52px);
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.38), 0 0 42px rgba(82, 39, 255, 0.2);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .cadastro-form h2 {
   color: #ffffff;
-  font-size: 2rem;
-  margin-bottom: 10px;
+  font-size: clamp(1.8rem, 4vw, 2.25rem);
+  margin: 0 0 10px;
   text-align: center;
 }
 
 .cadastro-form p {
   color: #e9d5ff;
   text-align: center;
-  margin-bottom: 30px;
+  margin: 0 0 30px;
   font-size: 0.95rem;
+}
+
+.cadastro-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.cadastro-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cadastro-field label {
+  color: #e9d5ff;
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .cadastro-form input {
   width: 100%;
   padding: 14px 18px;
-  margin-bottom: 18px;
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 10px;
   font-size: 1rem;
@@ -50,30 +71,41 @@
   color: #ffffff;
 }
 
+.cadastro-field:last-child {
+  grid-column: 1 / -1;
+}
+
 .cadastro-form input::placeholder { color: #d8b4fe; }
 
 .cadastro-form input:focus {
   outline: none;
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(196, 181, 253, 0.8);
   box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.2);
 }
 
 .btn-cadastro {
   width: 100%;
   padding: 16px;
-  background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+  background: linear-gradient(100deg, #7c3aed, #6d28d9);
   border: none;
   color: white;
   border-radius: 10px;
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: box-shadow 0.2s;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
   margin-top: 10px;
 }
 
 .btn-cadastro:hover {
-  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+  background: linear-gradient(100deg, #8b5cf6, #7c3aed);
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.38);
+  transform: translateY(-1px);
+}
+
+.btn-cadastro:focus-visible {
+  outline: 3px solid rgba(196, 181, 253, 0.85);
+  outline-offset: 3px;
 }
 
 .cadastro-footer {
@@ -93,4 +125,150 @@
 
 @media (max-width: 768px) {
   .cadastro-form { padding: 40px 30px; }
+}
+
+@media (max-width: 600px) {
+  .cadastro-form { padding: 30px 22px; }
+  .cadastro-fields { grid-template-columns: 1fr; gap: 14px; }
+  .cadastro-field:last-child { grid-column: auto; }
+}
+
+/* =====================================================
+   GiveNet · Card em glassmorphism (usado por Doacao.jsx)
+   Estilos visuais compartilhados — nenhuma regra de lógica
+   ===================================================== */
+.cadastro-container {
+  position: relative;
+  width: 100%;
+  max-width: 820px !important;
+  margin: 0 auto !important;
+  padding: clamp(24px, 3.4vw, 44px) !important;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 12% 0%, rgba(124, 58, 237, 0.16), transparent 58%),
+    linear-gradient(160deg, rgba(30, 12, 54, 0.74) 0%, rgba(14, 5, 28, 0.78) 100%) !important;
+  border: 1px solid rgba(167, 139, 250, 0.2) !important;
+  border-radius: 26px !important;
+  backdrop-filter: blur(16px) saturate(130%);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 0 60px rgba(124, 58, 237, 0.16) !important;
+}
+
+.cadastro-container::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(196, 181, 253, 0.45), transparent);
+  pointer-events: none;
+}
+
+/* Rótulo curto acima do título do formulário */
+.donation-eyebrow {
+  display: block;
+  width: fit-content;
+  margin: 0 auto 14px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  background: rgba(124, 58, 237, 0.16);
+  border: 1px solid rgba(167, 139, 250, 0.32);
+  color: #d8b4fe;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Cabeçalho interno do formulário de agendamento */
+.donation-form-head {
+  padding-bottom: 20px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.donation-form-title {
+  margin: 0 0 8px;
+  color: #ffffff;
+  font-size: clamp(1.25rem, 2.4vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.donation-form-sub {
+  margin: 0;
+  max-width: 56ch;
+  color: rgba(233, 213, 255, 0.62);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+/* ===== INPUTS / SELECTS (visual moderno dark) ===== */
+.field-wrap {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.field-wrap .field-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: rgba(196, 181, 253, 0.6);
+  pointer-events: none;
+  transition: color 0.2s ease;
+}
+
+.field-wrap .form-input {
+  padding-left: 46px !important;
+  background: rgba(10, 3, 22, 0.55) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 14px !important;
+  color: #f5f3ff !important;
+  font-size: 0.98rem !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.field-wrap .form-input::placeholder {
+  color: rgba(196, 181, 253, 0.42) !important;
+}
+
+.field-wrap .form-input:hover {
+  border-color: rgba(167, 139, 250, 0.34) !important;
+  background: rgba(16, 6, 32, 0.62) !important;
+}
+
+.field-wrap .form-input:focus {
+  outline: none !important;
+  border-color: rgba(167, 139, 250, 0.72) !important;
+  background: rgba(16, 6, 32, 0.72) !important;
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.2), 0 0 22px rgba(124, 58, 237, 0.22) !important;
+}
+
+.field-wrap:focus-within .field-icon {
+  color: #c4b5fd;
+}
+
+/* Selects com aparência de componente SaaS (sem visual padrão do navegador) */
+select.form-input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  padding-right: 42px !important;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23c4b5fd' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 16px 16px;
+}
+
+select.form-input option {
+  background: #1a0533 !important;
+  color: #f5f3ff !important;
+  padding: 10px;
 }

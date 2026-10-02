@@ -65,45 +65,68 @@ function Cadastro() {
           <h2>Criar Conta</h2>
           <p>Preencha os dados para se cadastrar</p>
 
-          <input
-            type="text"
-            placeholder="Nome Completo"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            required
-          />
+          <div className="cadastro-fields">
+            <div className="cadastro-field">
+              <label htmlFor="cadastro-nome">Nome</label>
+              <input
+                id="cadastro-nome"
+                type="text"
+                placeholder="Nome Completo"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                required
+              />
+            </div>
 
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value.trim())}
-            required
-          />
+            <div className="cadastro-field">
+              <label htmlFor="cadastro-email">E-mail</label>
+              <input
+                id="cadastro-email"
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value.trim())}
+                required
+              />
+            </div>
 
-          <input
-            type="tel"
-            placeholder="Telefone (11) 98765-4321"
-            value={telefone}
-            onChange={(e) => setTelefone(e.target.value)}
-            required
-          />
+            <div className="cadastro-field">
+              <label htmlFor="cadastro-telefone">Telefone</label>
+              <input
+                id="cadastro-telefone"
+                type="tel"
+                inputMode="numeric"
+                maxLength={11}
+                value={telefone}
+                onChange={(e) => setTelefone(e.target.value.replace(/\D/g, "").slice(0, 11))}
+                required
+              />
+            </div>
 
-          <input
-            type="password"
-            placeholder="Senha (mínimo 6 caracteres)"
-            value={senha}
-            onChange={(e) => setSenha(e.target.value.trim())}
-            required
-          />
+            <div className="cadastro-field">
+              <label htmlFor="cadastro-senha">Senha</label>
+              <input
+                id="cadastro-senha"
+                type="password"
+                placeholder="Mínimo 6 caracteres"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value.trim())}
+                required
+              />
+            </div>
 
-          <input
-            type="password"
-            placeholder="Confirmar Senha"
-            value={confirmarSenha}
-            onChange={(e) => setConfirmarSenha(e.target.value.trim())}
-            required
-          />
+            <div className="cadastro-field">
+              <label htmlFor="cadastro-confirmar-senha">Confirmar senha</label>
+              <input
+                id="cadastro-confirmar-senha"
+                type="password"
+                placeholder="Confirmar Senha"
+                value={confirmarSenha}
+                onChange={(e) => setConfirmarSenha(e.target.value.trim())}
+                required
+              />
+            </div>
+          </div>
 
           <button type="submit" className="btn-cadastro">
             Cadastrar

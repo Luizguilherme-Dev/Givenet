@@ -172,7 +172,9 @@ export default function OngsScreen() {
               <OngCard
                 key={ong.id}
                 ong={ong}
-                onDoarPress={() => router.push('/(tabs)/doacao')}
+                onDoarPress={(selecionada) =>
+                  router.push(`/(tabs)/doacao?ongId=${selecionada.id}` as any)
+                }
                 onDetalhesPress={(o) => router.push(`/ong/${o.id}` as any)}
               />
             ))}

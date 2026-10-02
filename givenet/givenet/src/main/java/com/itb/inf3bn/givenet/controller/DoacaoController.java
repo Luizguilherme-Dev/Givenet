@@ -1,27 +1,25 @@
 package com.itb.inf3bn.givenet.controller;
 
-import com.itb.inf3bn.givenet.config.AdminCheck;
+import com.itb.inf3bn.givenet.config.AuthenticatedUser;
 import com.itb.inf3bn.givenet.dto.DoacaoDTO;
 import com.itb.inf3bn.givenet.model.entity.AuditLog;
 import com.itb.inf3bn.givenet.model.entity.Doacao;
 import com.itb.inf3bn.givenet.model.entity.DoacaoStatusHistory;
 import com.itb.inf3bn.givenet.model.entity.Ong;
-import com.itb.inf3bn.givenet.model.entity.Usuario;
 import com.itb.inf3bn.givenet.repository.AuditLogRepository;
 import com.itb.inf3bn.givenet.repository.DoacaoRepository;
 import com.itb.inf3bn.givenet.repository.DoacaoStatusHistoryRepository;
 import com.itb.inf3bn.givenet.repository.OngRepository;
-import com.itb.inf3bn.givenet.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 @RestController
@@ -32,72 +30,70 @@ public class DoacaoController {
     @Autowired private OngRepository ongRepository;
     @Autowired private AuditLogRepository auditLogRepository;
     @Autowired private DoacaoStatusHistoryRepository statusHistoryRepository;
-    @Autowired private AdminCheck adminCheck;
-    @Autowired private UsuarioRepository usuarioRepository;
-
-    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     private final Random random = new Random();
 
+    private boolean podeAcessarDoacao(Doacao doacao, AuthenticatedUser solicitante) {
+        if (solicitante == null) return false;
+        if (doacao.getUsuarioId() != null && doacao.getUsuarioId().equals(solicitante.id())) {
+            return true;
+        }
+        if ("ADMIN".equals(solicitante.role())) {
+            return true;
+        }
+        if (doacao.getOng() != null && doacao.getOng().getEmail() != null) {
+            return doacao.getOng().getEmail().equalsIgnoreCase(solicitante.email());
+        }
+        return false;
+    }
+
     @GetMapping
-    public List<Doacao> listar(@RequestHeader("adminEmail") String email,
-                               @RequestHeader("adminSenha") String senha) {
-        adminCheck.verificar(email, senha);
+    public List<Doacao> listar() {
         return repository.findAll();
     }
 
     @GetMapping("/ong/{ongId}")
-    public List<Doacao> listarPorOng(@PathVariable Long ongId,
-                                     @RequestHeader("adminEmail") String email,
-                                     @RequestHeader("adminSenha") String senha) {
-        adminCheck.verificar(email, senha);
+    public List<Doacao> listarPorOng(@PathVariable Long ongId) {
         return repository.findByOngId(ongId);
     }
 
     @GetMapping("/auditoria")
-    public List<AuditLog> auditoria(
-            @RequestHeader("adminEmail") String email,
-            @RequestHeader("adminSenha") String senha) {
-        adminCheck.verificar(email, senha);
+    public List<AuditLog> auditoria() {
         return auditLogRepository.findAll();
     }
 
     @GetMapping("/{id}")
-    public Doacao buscar(@PathVariable Long id,
-                         @RequestHeader("usuarioId") Long solicitanteId,
-                         @RequestHeader(value = "adminEmail", required = false) String adminEmail,
-                         @RequestHeader(value = "adminSenha", required = false) String adminSenha) {
+    public Doacao buscar(@PathVariable Long id, @AuthenticationPrincipal AuthenticatedUser solicitante) {
         Doacao doacao = repository.findById(id).orElseThrow();
-        if (!doacao.getUsuarioId().equals(solicitanteId)) {
-            adminCheck.verificar(adminEmail, adminSenha);
+        if (!podeAcessarDoacao(doacao, solicitante)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado");
         }
         return doacao;
     }
 
     @GetMapping("/usuario/{usuarioId}")
     public List<Doacao> listarPorUsuario(@PathVariable Long usuarioId,
-                                         @RequestHeader("usuarioId") Long solicitanteId) {
-        if (!usuarioId.equals(solicitanteId)) {
+                                         @AuthenticationPrincipal AuthenticatedUser solicitante) {
+        if (!usuarioId.equals(solicitante.id())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado");
         }
         return repository.findByUsuarioId(usuarioId);
     }
 
     @GetMapping("/historico/{id}")
-    public List<DoacaoStatusHistory> historico(@PathVariable Long id,
-                                               @RequestHeader("usuarioId") Long solicitanteId,
-                                               @RequestHeader(value = "adminEmail", required = false) String adminEmail,
-                                               @RequestHeader(value = "adminSenha", required = false) String adminSenha) {
+    public List<DoacaoStatusHistory> historico(
+            @PathVariable Long id,
+            @AuthenticationPrincipal AuthenticatedUser solicitante) {
         Doacao doacao = repository.findById(id).orElseThrow();
-        if (!doacao.getUsuarioId().equals(solicitanteId)) {
-            adminCheck.verificar(adminEmail, adminSenha);
+        if (!podeAcessarDoacao(doacao, solicitante)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado");
         }
         return statusHistoryRepository.findByDoacaoIdOrderByDataHoraDesc(id);
     }
 
     @PostMapping
-    public Doacao criar(@RequestHeader("usuarioId") Long usuarioId,
+    public Doacao criar(@AuthenticationPrincipal AuthenticatedUser solicitante,
                         @RequestBody DoacaoDTO dto) {
-        if (dto.getUsuarioId() == null || !usuarioId.equals(dto.getUsuarioId())) {
+        if (dto.getUsuarioId() == null || !solicitante.id().equals(dto.getUsuarioId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Usuário da doação inválido");
         }
 
@@ -139,11 +135,11 @@ public class DoacaoController {
 
     @PutMapping("/{id}")
     public Doacao atualizar(@PathVariable Long id,
-                            @RequestHeader("usuarioId") Long usuarioId,
+                            @AuthenticationPrincipal AuthenticatedUser solicitante,
                             @RequestBody DoacaoDTO dto) {
         Doacao doacao = repository.findById(id).orElseThrow();
 
-        if (!doacao.getUsuarioId().equals(usuarioId)) {
+        if (!doacao.getUsuarioId().equals(solicitante.id())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não pode editar a doação de outro usuário");
         }
         if ("DOACAO_ENTREGUE".equals(doacao.getStatus())) {
@@ -156,7 +152,7 @@ public class DoacaoController {
         doacao.setData(dto.getData());
 
         auditLogRepository.save(AuditLog.builder()
-                .usuarioId(usuarioId)
+                .usuarioId(solicitante.id())
                 .acao("EDITAR_DOACAO")
                 .detalhe("Doação id=" + id + " editada")
                 .build());
@@ -165,96 +161,65 @@ public class DoacaoController {
     }
 
     @PatchMapping("/{id}/confirmar-entrega")
+    @Transactional
     public Doacao confirmarEntrega(
             @PathVariable Long id,
-            @RequestHeader(value = "adminEmail", required = false) String adminEmail,
-            @RequestHeader(value = "adminSenha", required = false) String adminSenha,
-            @RequestHeader(value = "usuarioId", required = false) Long solicitanteId,
-            @RequestHeader(value = "usuarioSenha", required = false) String usuarioSenha,
-            @RequestParam(value = "pin", required = false) String pin) {
+            @RequestParam(value = "pin", required = false) String pin,
+            @AuthenticationPrincipal AuthenticatedUser solicitante) {
 
-        Doacao doacao = repository.findById(id)
+        Doacao doacao = repository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doação não encontrada"));
 
-        if ("DOACAO_ENTREGUE".equals(doacao.getStatus())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Doação já marcada como entregue");
-        }
-
-        Long confirmadorId = null;
-        boolean autorizado = false;
-
-        if (adminEmail != null && adminSenha != null) {
-            try {
-                adminCheck.verificar(adminEmail, adminSenha);
-                autorizado = true;
-                confirmadorId = -1L;
-            } catch (ResponseStatusException e) {
-                // não é admin, tenta como representante de ONG
-            }
-        }
-
-        if (!autorizado && solicitanteId != null && usuarioSenha != null) {
-            Optional<Usuario> usuarioOpt = usuarioRepository.findById(solicitanteId);
-            if (usuarioOpt.isPresent()) {
-                Usuario usuario = usuarioOpt.get();
-                boolean senhaOk = encoder.matches(usuarioSenha, usuario.getSenha());
-                if (senhaOk) {
-                    String emailOng = doacao.getOng().getEmail();
-                    if (emailOng != null && emailOng.equalsIgnoreCase(usuario.getEmail())) {
-                        autorizado = true;
-                        confirmadorId = solicitanteId;
-                    }
-                    if ("ADMIN".equals(usuario.getRole())) {
-                        autorizado = true;
-                        confirmadorId = solicitanteId;
-                    }
-                }
-            }
-        }
-
-        if (!autorizado && pin != null && pin.equals(doacao.getPinConfirmacao())) {
-            autorizado = true;
-            confirmadorId = solicitanteId != null ? solicitanteId : -2L;
-        }
-
-        if (!autorizado && solicitanteId != null && doacao.getUsuarioId().equals(solicitanteId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "Usuário comum não pode confirmar a própria doação");
-        }
-
-        if (!autorizado) {
+        if (solicitante == null
+                || (!"ADMIN".equals(solicitante.role()) && !"ONG".equals(solicitante.role()))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                     "Acesso negado: apenas administradores ou representantes da ONG podem confirmar a entrega");
+        }
+
+        if ("ONG".equals(solicitante.role())) {
+            String emailOng = doacao.getOng().getEmail();
+            if (emailOng == null || !emailOng.equalsIgnoreCase(solicitante.email())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "Acesso negado: esta doação não pertence à sua ONG");
+            }
+        }
+
+        if (pin != null && !pin.equals(doacao.getPinConfirmacao())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "PIN incorreto");
+        }
+
+        if (!"AGENDADO".equals(doacao.getStatus())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Esta doação não pode mais ser confirmada");
         }
 
         String statusAnterior = doacao.getStatus();
         doacao.setStatus("DOACAO_ENTREGUE");
         doacao.setDataEntrega(LocalDateTime.now());
-        doacao.setConfirmadoPorUsuarioId(confirmadorId);
+        doacao.setConfirmadoPorUsuarioId(solicitante.id());
         Doacao salva = repository.save(doacao);
 
         statusHistoryRepository.save(DoacaoStatusHistory.builder()
                 .doacaoId(id)
                 .statusAnterior(statusAnterior)
                 .statusNovo("DOACAO_ENTREGUE")
-                .alteradoPorUsuarioId(confirmadorId)
+                .alteradoPorUsuarioId(solicitante.id())
                 .build());
 
         auditLogRepository.save(AuditLog.builder()
-                .usuarioId(confirmadorId)
+                .usuarioId(solicitante.id())
                 .acao("CONFIRMAR_ENTREGA")
-                .detalhe("Doação id=" + id + " confirmada como DOACAO_ENTREGUE por usuarioId=" + confirmadorId)
+                .detalhe("Doação id=" + id + " confirmada como DOACAO_ENTREGUE por usuarioId=" + solicitante.id())
                 .build());
 
         return salva;
     }
 
     @PatchMapping("/{id}/cancelar")
-    public Doacao cancelar(@PathVariable Long id,
-                           @RequestHeader("usuarioId") Long usuarioId) {
+    public Doacao cancelar(@PathVariable Long id, @AuthenticationPrincipal AuthenticatedUser solicitante) {
         Doacao doacao = repository.findById(id).orElseThrow();
 
-        if (!doacao.getUsuarioId().equals(usuarioId)) {
+        if (!doacao.getUsuarioId().equals(solicitante.id())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado");
         }
         if ("DOACAO_ENTREGUE".equals(doacao.getStatus())) {
@@ -269,11 +234,11 @@ public class DoacaoController {
                 .doacaoId(id)
                 .statusAnterior(statusAnterior)
                 .statusNovo("CANCELADO")
-                .alteradoPorUsuarioId(usuarioId)
+                .alteradoPorUsuarioId(solicitante.id())
                 .build());
 
         auditLogRepository.save(AuditLog.builder()
-                .usuarioId(usuarioId)
+                .usuarioId(solicitante.id())
                 .acao("CANCELAR_DOACAO")
                 .detalhe("Doação id=" + id + " cancelada pelo usuário")
                 .build());
@@ -282,20 +247,26 @@ public class DoacaoController {
     }
 
     @DeleteMapping("/{id}")
-    public void deletar(@PathVariable Long id,
-                        @RequestHeader("usuarioId") Long usuarioId) {
+    @Transactional
+    public void deletar(@PathVariable Long id, @AuthenticationPrincipal AuthenticatedUser solicitante) {
         Doacao doacao = repository.findById(id).orElseThrow();
-        if (!doacao.getUsuarioId().equals(usuarioId)) {
+        boolean isAdmin = solicitante != null && "ADMIN".equals(solicitante.role());
+        boolean isEntregue = "DOACAO_ENTREGUE".equalsIgnoreCase(doacao.getStatus())
+                || "CONCLUIDA".equalsIgnoreCase(doacao.getStatus());
+
+        if (isEntregue && !isAdmin) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Apenas administradores podem excluir doações concluídas");
+        }
+        if (!isEntregue && (solicitante == null || !doacao.getUsuarioId().equals(solicitante.id()))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não pode deletar a doação de outro usuário");
         }
-        if ("DOACAO_ENTREGUE".equals(doacao.getStatus())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não é possível deletar uma doação já entregue");
-        }
         auditLogRepository.save(AuditLog.builder()
-                .usuarioId(usuarioId)
+                .usuarioId(solicitante.id())
                 .acao("DELETAR_DOACAO")
-                .detalhe("Doação id=" + id + " deletada")
+                .detalhe("Doação id=" + id + " deletada" + (isEntregue ? " por administrador" : ""))
                 .build());
+        statusHistoryRepository.deleteByDoacaoId(id);
         repository.deleteById(id);
     }
 }

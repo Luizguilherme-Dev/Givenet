@@ -4,7 +4,16 @@ import PropTypes from "prop-types";
 import { QRCodeSVG } from "qrcode.react";
 import "./AcompanhamentoDoacao.css";
 
-export function CardAcompanhamento({ doacao, onConfirmar, podeConfirmar, confirmando, onConfirmarPin }) {
+export function CardAcompanhamento({
+  doacao,
+  onConfirmar,
+  podeConfirmar,
+  confirmando,
+  podeExcluirConcluidas,
+  onExcluir,
+  excluindo,
+  onConfirmarPin,
+}) {
   const [mostrarQR, setMostrarQR] = useState(false);
   const status = doacao.status?.toUpperCase() ?? "AGENDADO";
   const isEntregue = status === "CONCLUIDA" || status === "DOACAO_ENTREGUE";
@@ -23,7 +32,7 @@ export function CardAcompanhamento({ doacao, onConfirmar, podeConfirmar, confirm
     ? new Date(doacao.dataEntrega).toLocaleString("pt-BR")
     : null;
 
-  const qrValue = `http://localhost:8080/doacoes/${doacao.id}/confirmar-entrega`;
+  const qrValue = `${window.location.origin}/confirmar-doacao?qr=${encodeURIComponent(doacao.id)}`;
 
   return (
     <div className="acomp-card">
@@ -81,6 +90,16 @@ export function CardAcompanhamento({ doacao, onConfirmar, podeConfirmar, confirm
             <span className="acomp-entrega-data">{dataEntregaFormatada}</span>
           </div>
         </div>
+      )}
+
+      {podeExcluirConcluidas && isEntregue && (
+        <button
+          className="btn-deletar"
+          onClick={() => onExcluir && onExcluir(doacao.id)}
+          disabled={excluindo}
+        >
+          {excluindo ? "Excluindo..." : "Excluir registro concluído"}
+        </button>
       )}
 
       {/* ── Botão QR Code (somente quando não entregue/cancelado) ── */}
@@ -147,11 +166,16 @@ CardAcompanhamento.propTypes = {
   onConfirmarPin: PropTypes.func,
   podeConfirmar: PropTypes.bool,
   confirmando: PropTypes.bool,
+  podeExcluirConcluidas: PropTypes.bool,
+  onExcluir: PropTypes.func,
+  excluindo: PropTypes.bool,
 };
 
 CardAcompanhamento.defaultProps = {
   podeConfirmar: false,
   confirmando: false,
+  podeExcluirConcluidas: false,
+  excluindo: false,
 };
 
 export function SkeletonAcompanhamento() {

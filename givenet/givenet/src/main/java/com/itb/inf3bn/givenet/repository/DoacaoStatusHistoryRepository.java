@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface DoacaoStatusHistoryRepository extends JpaRepository<DoacaoStatusHistory, Long> {
     List<DoacaoStatusHistory> findByDoacaoIdOrderByDataHoraDesc(Long doacaoId);
+    void deleteByDoacaoId(Long doacaoId);
 }

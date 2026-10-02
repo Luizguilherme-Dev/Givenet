@@ -113,6 +113,89 @@
   border-color: rgba(255, 255, 255, 0.6) !important;
 }
 
+/* =====================================================
+   GiveNet · Formulário de agendamento — visual dark/SaaS
+   Somente aparência: nenhuma regra de negócio foi alterada.
+   ===================================================== */
+.cadastro-form {
+  position: relative;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: clamp(22px, 3vw, 34px);
+  box-sizing: border-box;
+  gap: 18px;
+  background: linear-gradient(160deg, rgba(23, 8, 44, 0.72) 0%, rgba(11, 4, 24, 0.78) 100%);
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  border-radius: 24px;
+  backdrop-filter: blur(16px) saturate(130%);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+  box-shadow:
+    0 22px 56px rgba(0, 0, 0, 0.42),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 0 56px rgba(124, 58, 237, 0.16);
+}
+
+.cadastro-form::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(196, 181, 253, 0.5), transparent);
+  pointer-events: none;
+}
+
+.cadastro-form .form-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(233, 213, 255, 0.78) !important;
+}
+
+.cadastro-form .form-input {
+  padding: 14px 16px !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: rgba(10, 3, 22, 0.55) !important;
+  color: #f5f3ff !important;
+  font-size: 0.98rem !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.cadastro-form .form-input::placeholder {
+  color: rgba(196, 181, 253, 0.42) !important;
+}
+
+.cadastro-form .form-input:hover {
+  border-color: rgba(167, 139, 250, 0.34) !important;
+  background: rgba(16, 6, 32, 0.62) !important;
+}
+
+.cadastro-form .form-input:focus {
+  outline: none !important;
+  border-color: rgba(167, 139, 250, 0.72) !important;
+  background: rgba(16, 6, 32, 0.72) !important;
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.2), 0 0 22px rgba(124, 58, 237, 0.22) !important;
+}
+
+.cadastro-form select.form-input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  padding-right: 42px !important;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23c4b5fd' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 16px 16px;
+}
+
+.cadastro-form select.form-input option {
+  background: #1a0533 !important;
+  color: #f5f3ff !important;
+}
+
 .horario-preview {
   display: inline-block;
   margin-top: 8px;
@@ -146,6 +229,75 @@
   background: rgba(255, 255, 255, 0.3) !important;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== Botão principal do formulário (roxo GiveNet) ===== */
+.cadastro-form .btn-donacao {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 6px;
+  padding: 16px 24px !important;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 52%, #6d28d9 100%) !important;
+  border: 1px solid rgba(196, 181, 253, 0.4) !important;
+  border-radius: 14px !important;
+  color: #ffffff !important;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: 0 10px 26px rgba(109, 40, 217, 0.34), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.cadastro-form .btn-donacao:hover {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 52%, #6d28d9 100%) !important;
+  transform: translateY(-2px);
+  filter: brightness(1.07);
+  box-shadow: 0 14px 34px rgba(124, 58, 237, 0.46), 0 0 24px rgba(139, 92, 246, 0.32);
+}
+
+.cadastro-form .btn-donacao:active {
+  transform: translateY(0) scale(0.99);
+  filter: brightness(0.96);
+  box-shadow: 0 6px 16px rgba(109, 40, 217, 0.34);
+}
+
+.cadastro-form .btn-donacao:focus-visible {
+  outline: 2px solid rgba(196, 181, 253, 0.85);
+  outline-offset: 3px;
+}
+
+.cadastro-form .btn-donacao:disabled {
+  background: rgba(124, 58, 237, 0.24) !important;
+  border-color: rgba(196, 181, 253, 0.22) !important;
+  color: rgba(245, 243, 255, 0.55) !important;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+}
+
+.btn-donacao-arrow {
+  font-size: 1.05rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.cadastro-form .btn-donacao:hover .btn-donacao-arrow {
+  transform: translateX(3px);
+}
+
+/* Bloco de apoio (chip informativo) */
+.cadastro-form .ong-aceita {
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(124, 58, 237, 0.12) !important;
+  border: 1px dashed rgba(167, 139, 250, 0.32) !important;
+  color: rgba(233, 213, 255, 0.78) !important;
+  font-weight: 500;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .lista-titulo {
@@ -312,12 +464,41 @@
 }
 
 
+/* ===== ÍCONES DOS CAMPOS ===== */
+.field-wrap {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.field-wrap .field-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: rgba(196, 181, 253, 0.55);
+  pointer-events: none;
+  transition: color 0.2s ease;
+}
+
+.field-wrap .form-input {
+  padding-left: 46px !important;
+}
+
+.field-wrap:focus-within .field-icon {
+  color: #c4b5fd;
+}
+
 /* ===== RESPONSIVO ===== */
 @media (max-width: 768px) {
   .cadastro-container { padding: 30px 20px; margin: 0; }
   .cadastro-title { font-size: 1.75rem; }
   .pacientes-lista li { flex-direction: column; align-items: flex-start; gap: 15px; }
   .btn-deletar { width: 100%; }
+  .cadastro-form { padding: 24px 20px; border-radius: 20px; }
+  .donation-form-sub { font-size: 0.88rem; }
 }
 
 @media (max-width: 480px) {
@@ -327,6 +508,18 @@
   .btn-cadastrar { padding: 14px !important; font-size: 1rem; }
   .paciente-nome { font-size: 1.1rem; }
   .paciente-info { font-size: 0.9rem; }
+  .cadastro-form { padding: 20px 16px; gap: 16px; }
+  .cadastro-form .form-input { padding: 13px 14px !important; }
+  .field-wrap .form-input { padding-left: 42px !important; }
+  .field-wrap .field-icon { left: 13px; width: 17px; height: 17px; }
+  .cadastro-form .btn-donacao { font-size: 1rem; padding: 15px 20px !important; }
+  .tabs { gap: 8px; }
+  .tab-btn { padding: 10px 12px !important; font-size: 0.85rem; }
+}
+
+@media (max-width: 360px) {
+  .cadastro-container { padding: 16px 12px; }
+  .cadastro-form { padding: 16px 13px; }
 }
 
 /* Modal confirmar entrega */
@@ -414,9 +607,9 @@
 .modal-btn-confirmar {
   flex: 1;
   padding: 12px;
-  background: rgba(34, 197, 94, 0.2);
-  border: 1px solid rgba(34, 197, 94, 0.45);
-  color: #4ade80;
+  background: linear-gradient(100deg, rgba(139, 92, 246, 0.34), rgba(109, 40, 217, 0.34));
+  border: 1px solid rgba(167, 139, 250, 0.55);
+  color: #e9d5ff;
   border-radius: 10px;
   font-size: 0.95rem;
   font-weight: 700;
@@ -425,8 +618,8 @@
 }
 
 .modal-btn-confirmar:hover:not(:disabled) {
-  background: rgba(34, 197, 94, 0.35);
-  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.25);
+  background: linear-gradient(100deg, rgba(139, 92, 246, 0.5), rgba(109, 40, 217, 0.5));
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
 }
 
 .modal-btn-confirmar:disabled,
@@ -445,8 +638,8 @@
 .modal-spinner {
   width: 14px;
   height: 14px;
-  border: 2px solid rgba(74, 222, 128, 0.3);
-  border-top-color: #4ade80;
+  border: 2px solid rgba(196, 181, 253, 0.3);
+  border-top-color: #c4b5fd;
   border-radius: 50%;
   animation: modal-spin 0.7s linear infinite;
 }
@@ -476,4 +669,36 @@
   .pacientes-lista li {
     animation: none;
   }
+}
+
+/* ===== Card e botão de edição (abas Agendamentos / Lista) ===== */
+.cadastro-container .acomp-card,
+.cadastro-container .acomp-skeleton-card {
+  background: linear-gradient(160deg, rgba(23, 8, 44, 0.6) 0%, rgba(11, 4, 24, 0.66) 100%);
+  border: 1px solid rgba(167, 139, 250, 0.16);
+  border-radius: 20px;
+}
+
+.cadastro-container .acomp-card:hover {
+  border-color: rgba(167, 139, 250, 0.32);
+  box-shadow: 0 12px 34px rgba(124, 58, 237, 0.2);
+}
+
+.cadastro-container .paciente-card .btn-cadastrar,
+.cadastro-container .paciente-card .btn-deletar {
+  margin-top: 0;
+  border-radius: 10px !important;
+  font-size: 0.82rem;
+  padding: 9px 14px !important;
+}
+
+.cadastro-container .paciente-card .btn-cadastrar {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(109, 40, 217, 0.9)) !important;
+  border-color: rgba(196, 181, 253, 0.4) !important;
+}
+
+.cadastro-container .paciente-card .btn-deletar {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  color: rgba(245, 243, 255, 0.82) !important;
 }

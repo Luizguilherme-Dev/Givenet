@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Usuario } from '@/types';
-import { ApiService } from '@/services/api';
+import { ApiService, STORAGE_KEY_TOKEN } from '@/services/api';
 
 interface AuthContextData {
   usuario: Usuario | null;
@@ -48,11 +48,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const storedUser = await AsyncStorage.getItem(STORAGE_KEY_USER);
         if (storedUser) {
           const parsedUser: Usuario = JSON.parse(storedUser);
-          const userPhoto = await AsyncStorage.getItem(`${STORAGE_KEY_FOTO}${parsedUser.id}`);
-          if (userPhoto) {
-            parsedUser.foto = userPhoto;
+          const token = await AsyncStorage.getItem(STORAGE_KEY_TOKEN);
+          if (token) {
+            parsedUser.token = token;
+            const userPhoto = await AsyncStorage.getItem(`${STORAGE_KEY_FOTO}${parsedUser.id}`);
+            if (userPhoto) {
+              parsedUser.foto = userPhoto;
+            }
+            setUsuario(parsedUser);
+          } else {
+            await AsyncStorage.removeItem(STORAGE_KEY_USER);
           }
-          setUsuario(parsedUser);
+        } else {
+          await AsyncStorage.removeItem(STORAGE_KEY_TOKEN);
         }
       } catch (e) {
         console.error('Erro ao carregar dados do usuário:', e);
@@ -67,11 +75,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       const user = await ApiService.login(email, senha);
+      if (!user.token) {
+        throw new Error('Token de autenticação não recebido');
+      }
       const userPhoto = await AsyncStorage.getItem(`${STORAGE_KEY_FOTO}${user.id}`);
       if (userPhoto) {
         user.foto = userPhoto;
       }
       setUsuario(user);
+      await AsyncStorage.setItem(STORAGE_KEY_TOKEN, user.token);
       await AsyncStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));
       return user;
     } finally {
@@ -98,6 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async (): Promise<void> => {
     setUsuario(null);
     await AsyncStorage.removeItem(STORAGE_KEY_USER);
+    await AsyncStorage.removeItem(STORAGE_KEY_TOKEN);
   };
 
   const atualizarPerfil = async (data: {
@@ -111,7 +124,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     const updatedUser = await ApiService.atualizarPerfil(usuario.id, data);
-    const userWithPhoto = { ...updatedUser, foto: usuario.foto };
+    const userWithPhoto = { ...updatedUser, foto: usuario.foto, token: usuario.token };
     setUsuario(userWithPhoto);
     await AsyncStorage.setItem(STORAGE_KEY_USER, JSON.stringify(userWithPhoto));
     return userWithPhoto;

@@ -42,7 +42,7 @@ export const CardDoacao: React.FC<Props> = ({
     : null;
 
   const handleConfirmarPin = async (pin: string) => {
-    if (!onConfirmarPin) return;
+    if (!podeConfirmar || !onConfirmarPin) return;
     setLoadingConfirm(true);
     try {
       await onConfirmarPin(doacao.id, pin);
@@ -218,14 +218,16 @@ export const CardDoacao: React.FC<Props> = ({
             <Text style={styles.pinLabel}>PIN DE ENTREGA</Text>
             <Text style={styles.pinNumber}>{doacao.pinConfirmacao}</Text>
           </View>
-          <TouchableOpacity
-            style={styles.pinConfirmBtn}
-            onPress={() => setModalPinVisible(true)}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="keypad" size={14} color="#FFFFFF" />
-            <Text style={styles.pinConfirmBtnText}>Validar PIN</Text>
-          </TouchableOpacity>
+          {podeConfirmar && (
+            <TouchableOpacity
+              style={styles.pinConfirmBtn}
+              onPress={() => setModalPinVisible(true)}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="keypad" size={14} color="#FFFFFF" />
+              <Text style={styles.pinConfirmBtnText}>Validar PIN</Text>
+            </TouchableOpacity>
+          )}
         </View>
       )}
 
@@ -271,13 +273,15 @@ export const CardDoacao: React.FC<Props> = ({
         doacao={doacao}
       />
 
-      <ModalPinConfirmacao
-        visible={modalPinVisible}
-        onClose={() => setModalPinVisible(false)}
-        onConfirmar={handleConfirmarPin}
-        loading={loadingConfirm}
-        targetPin={doacao.pinConfirmacao}
-      />
+      {podeConfirmar && (
+        <ModalPinConfirmacao
+          visible={modalPinVisible}
+          onClose={() => setModalPinVisible(false)}
+          onConfirmar={handleConfirmarPin}
+          loading={loadingConfirm}
+          targetPin={doacao.pinConfirmacao}
+        />
+      )}
     </View>
   );
 };

@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useSearchParams } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import "./ConfirmarDoacao.css";
 import AuroraBg from "../Shared/AuroraBg";
@@ -46,42 +47,29 @@ function PinDigits({ pinReal, pinDigitado }) {
 export default function ConfirmarDoacao() {
   const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado") || "null");
   const isAdmin = usuarioLogado?.role === "ROLE_ADMIN" || usuarioLogado?.role === "ADMIN";
+  const isOng = usuarioLogado?.role === "ROLE_ONG" || usuarioLogado?.role === "ONG";
+  const podeConfirmarEntrega = isAdmin || isOng;
+  const [searchParams] = useSearchParams();
+  const qrDoacaoId = searchParams.get("qr");
+  const agendamentoId = searchParams.get("doacao");
 
-  const [doacaoId, setDoacaoId] = useState("");
-  const [senhaAdmin, setSenhaAdmin] = useState("");
+  const [doacaoId, setDoacaoId] = useState(agendamentoId || "");
   const [doacao, setDoacao] = useState(null);
   const [buscando, setBuscando] = useState(false);
-  const [metodo, setMetodo] = useState("pin");
+  const [metodo, setMetodo] = useState(qrDoacaoId ? "qr" : "pin");
   const [pin, setPin] = useState("");
   const [progresso, setProgresso] = useState("idle");
   const [mostrarQR, setMostrarQR] = useState(false);
 
-  if (!isAdmin) {
-    return (
-      <div className="conf-page">
-        <AuroraBg />
-        <div className="conf-container">
-          <p className="conf-negado">Acesso restrito a administradores.</p>
-        </div>
-      </div>
-    );
-  }
-
-  const buscarDoacao = async () => {
-    if (!doacaoId) return toast.error("Informe o ID da doação.");
+  const buscarDoacao = useCallback(async (id) => {
+    if (!id) return toast.error("Informe o ID da doação.");
     setBuscando(true);
     setDoacao(null);
     setPin("");
     try {
-      const res = await axios.get(`http://localhost:8080/doacoes/${doacaoId}`, {
-        headers: {
-          usuarioId: usuarioLogado.id,
-          adminEmail: usuarioLogado.email,
-          adminSenha: senhaAdmin,
-        },
-      });
-      if (res.data.status === "CONCLUIDA" || res.data.status === "DOACAO_ENTREGUE") {
-        toast.warning("Esta doação já foi confirmada.");
+      const res = await axios.get(`http://localhost:8080/doacoes/${id}`);
+      if (res.data.status !== "AGENDADO") {
+        toast.warning("Esta doação não está disponível para confirmação.");
         return;
       }
       setDoacao(res.data);
@@ -90,11 +78,30 @@ export default function ConfirmarDoacao() {
     } finally {
       setBuscando(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const id = qrDoacaoId || agendamentoId;
+    if (!id) return;
+    setDoacaoId(id);
+    setMetodo(qrDoacaoId ? "qr" : "pin");
+    buscarDoacao(id);
+  }, [qrDoacaoId, agendamentoId, buscarDoacao]);
 
   const pinValido = doacao && pin.length === 4 && pin === doacao.pinConfirmacao;
   const pinCompleto = pin.length === 4;
   const pinErrado = pinCompleto && doacao && pin !== doacao.pinConfirmacao;
+
+  if (!podeConfirmarEntrega) {
+    return (
+      <div className="conf-page">
+        <AuroraBg />
+        <div className="conf-container">
+          <p className="conf-negado">Acesso restrito a ONGs e administradores.</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleConfirmar = async () => {
     if (!doacao) return;
@@ -102,20 +109,16 @@ export default function ConfirmarDoacao() {
 
     setProgresso("loading");
     try {
-      const headers = { usuarioId: usuarioLogado.id };
       const params = {};
 
       if (metodo === "pin") {
         params.pin = pin;
-      } else {
-        headers.adminEmail = usuarioLogado.email;
-        headers.adminSenha = senhaAdmin;
       }
 
       await axios.patch(
         `http://localhost:8080/doacoes/${doacaoId}/confirmar-entrega`,
         {},
-        { headers, params }
+        { params }
       );
       setProgresso("concluido");
     } catch (err) {
@@ -131,11 +134,10 @@ export default function ConfirmarDoacao() {
     setDoacaoId("");
     setDoacao(null);
     setPin("");
-    setSenhaAdmin("");
   };
 
   const qrValue = doacaoId
-    ? `http://localhost:8080/doacoes/${doacaoId}/confirmar-entrega`
+    ? `${window.location.origin}/confirmar-doacao?qr=${encodeURIComponent(doacaoId)}`
     : "https://givenet.app";
 
   return (
@@ -143,7 +145,7 @@ export default function ConfirmarDoacao() {
       <AuroraBg />
       <div className="conf-container">
         <h2 className="conf-titulo">Confirmar Entrega</h2>
-        <p className="conf-sub">Painel exclusivo para administradores</p>
+        <p className="conf-sub">Painel restrito a ONGs e administradores</p>
 
         {progresso !== "concluido" && (
           <>
@@ -158,7 +160,7 @@ export default function ConfirmarDoacao() {
                   onChange={(e) => { setDoacaoId(e.target.value); setDoacao(null); setPin(""); }}
                   onKeyDown={(e) => e.key === "Enter" && buscarDoacao()}
                 />
-                <button className="conf-btn-buscar" onClick={buscarDoacao} disabled={buscando || !doacaoId}>
+                <button className="conf-btn-buscar" onClick={() => buscarDoacao(doacaoId)} disabled={buscando || !doacaoId}>
                   {buscando ? <span className="conf-spinner" /> : "Buscar"}
                 </button>
               </div>
@@ -230,12 +232,10 @@ export default function ConfirmarDoacao() {
                 <button
                   className="conf-btn-confirmar"
                   onClick={handleConfirmar}
-                  disabled={progresso === "loading" || (metodo === "pin" && !pinValido) || metodo === "qr"}
+                  disabled={progresso === "loading" || (metodo === "pin" && !pinValido)}
                 >
                   {progresso === "loading" ? (
                     <span className="conf-btn-inner"><span className="conf-spinner" /> Confirmando...</span>
-                  ) : metodo === "qr" ? (
-                    "Apresente o QR Code na ONG"
                   ) : (
                     "Confirmar Entrega"
                   )}

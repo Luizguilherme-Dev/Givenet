@@ -18,7 +18,8 @@ import { Doacao } from '@/types';
 
 export default function ConfirmarScreen() {
   const router = useRouter();
-  const { usuario, isAdmin, isOng } = useAuth();
+  const { usuario, isAdmin, isOng, isLoading } = useAuth();
+  const podeConfirmarEntrega = isAdmin || isOng;
 
   const [doacaoId, setDoacaoId] = useState('');
   const [doacao, setDoacao] = useState<Doacao | null>(null);
@@ -28,6 +29,11 @@ export default function ConfirmarScreen() {
   const [concluido, setConcluido] = useState(false);
 
   const handleBuscar = async () => {
+    if (!podeConfirmarEntrega) {
+      Alert.alert('Acesso restrito', 'Somente ONGs e administradores podem validar entregas.');
+      return;
+    }
+
     if (!doacaoId.trim()) {
       Alert.alert('Atenção', 'Informe o ID da doação.');
       return;
@@ -54,10 +60,17 @@ export default function ConfirmarScreen() {
   const pinValido = doacao && pin.length === 4 && pin === doacao.pinConfirmacao;
   const pinErrado = doacao && pin.length === 4 && pin !== doacao.pinConfirmacao;
 
+  const podeConfirmarSemPin = isAdmin || isOng;
+
   const handleConfirmarEntrega = async () => {
+    if (!podeConfirmarEntrega) {
+      Alert.alert('Acesso restrito', 'Somente ONGs e administradores podem confirmar entregas.');
+      return;
+    }
+
     if (!doacao) return;
 
-    if (doacao.pinConfirmacao && !pinValido && !isAdmin) {
+    if (doacao.pinConfirmacao && !pinValido && !podeConfirmarSemPin) {
       Alert.alert('PIN Inválido', 'O PIN digitado não coincide com a doação.');
       return;
     }
@@ -67,7 +80,6 @@ export default function ConfirmarScreen() {
     try {
       await ApiService.confirmarEntrega(doacao.id, {
         pin: pin || undefined,
-        usuarioId: usuario?.id,
       });
 
       setConcluido(true);
@@ -89,6 +101,39 @@ export default function ConfirmarScreen() {
 
   const nomeOng =
     typeof doacao?.ong === 'object' ? doacao?.ong?.nome : doacao?.ong || 'ONG Parceira';
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
+        <ActivityIndicator size="large" color={GiveNetTheme.primaryLight} />
+      </View>
+    );
+  }
+
+  if (!podeConfirmarEntrega) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.topBar}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={22} color={GiveNetTheme.textPrimary} />
+          </TouchableOpacity>
+          <Text style={styles.topBarTitle}>Área restrita</Text>
+          <View style={{ width: 38 }} />
+        </View>
+        <View style={styles.introCard}>
+          <View style={styles.introIcon}>
+            <Ionicons name="lock-closed" size={24} color={GiveNetTheme.primaryLight} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.introTitle}>Acesso restrito</Text>
+            <Text style={styles.introSub}>
+              Somente ONGs e administradores podem validar e confirmar entregas.
+            </Text>
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -254,10 +299,10 @@ export default function ConfirmarScreen() {
                 <TouchableOpacity
                   style={[
                     styles.confirmActionBtn,
-                    (!pinValido && !isAdmin) && styles.confirmActionBtnDisabled,
+                    (!pinValido && !podeConfirmarSemPin) && styles.confirmActionBtnDisabled,
                   ]}
                   onPress={handleConfirmarEntrega}
-                  disabled={confirmando || (!pinValido && !isAdmin)}
+                  disabled={confirmando || (!pinValido && !podeConfirmarSemPin)}
                 >
                   {confirmando ? (
                     <ActivityIndicator size="small" color="#FFFFFF" />

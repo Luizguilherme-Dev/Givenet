@@ -9,6 +9,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.io.Console;
+import java.io.FilterInputStream;
 import java.util.Scanner;
 
 @Component
@@ -30,9 +31,25 @@ public class AdminSetupRunner implements ApplicationRunner {
             return;
         }
 
-        String nome = valueOrPrompt(args, "admin-name", "Nome do administrador", false);
-        String email = valueOrPrompt(args, "admin-email", "Email do administrador", false);
-        String senha = valueOrPrompt(args, "admin-password", "Senha do administrador", true);
+        Console console = System.console();
+        String nome;
+        String email;
+        String senha;
+        if (console != null) {
+            nome = valueOrPrompt(args, "admin-name", "Nome do administrador", false, console, null);
+            email = valueOrPrompt(args, "admin-email", "Email do administrador", false, console, null);
+            senha = valueOrPrompt(args, "admin-password", "Senha do administrador", true, console, null);
+        } else {
+            try (Scanner scanner = new Scanner(new FilterInputStream(System.in) {
+                @Override
+                public void close() {
+                }
+            })) {
+                nome = valueOrPrompt(args, "admin-name", "Nome do administrador", false, null, scanner);
+                email = valueOrPrompt(args, "admin-email", "Email do administrador", false, null, scanner);
+                senha = valueOrPrompt(args, "admin-password", "Senha do administrador", true, null, scanner);
+            }
+        }
 
         if (usuarioRepository.findByEmail(email).isPresent()) {
             throw new IllegalStateException("Nao foi possivel criar o administrador: o email ja existe.");
@@ -49,7 +66,13 @@ public class AdminSetupRunner implements ApplicationRunner {
         applicationContext.close();
     }
 
-    private String valueOrPrompt(ApplicationArguments args, String option, String label, boolean secret) {
+    private String valueOrPrompt(
+            ApplicationArguments args,
+            String option,
+            String label,
+            boolean secret,
+            Console console,
+            Scanner scanner) {
         String value = args.getOptionValues(option) == null
                 ? null
                 : args.getOptionValues(option).get(0);
@@ -57,7 +80,6 @@ public class AdminSetupRunner implements ApplicationRunner {
             return value.trim();
         }
 
-        Console console = System.console();
         if (console != null) {
             String prompt = secret ? label + " (a senha nao sera exibida): " : label + ": ";
             String prompted = secret ? new String(console.readPassword(prompt)) : console.readLine(prompt);
@@ -68,6 +90,6 @@ public class AdminSetupRunner implements ApplicationRunner {
             System.out.println(label + " (a senha nao sera exibida):");
         }
         System.out.print(label + ": ");
-        return new Scanner(System.in).nextLine().trim();
+        return scanner.nextLine().trim();
     }
 }

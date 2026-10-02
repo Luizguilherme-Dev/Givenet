@@ -40,48 +40,6 @@ const aceitaPorONG = {
   "AACD": ["Cadeira de rodas", "Muletas", "Equipamentos de reabilitação"],
 };
 
-function ModalConfirmarEntrega({ onConfirmar, onCancelar, loading }) {
-  const [senha, setSenha] = useState("");
-  const [pin, setPin] = useState("");
-  return (
-    <div className="modal-overlay">
-      <div className="modal-box">
-        <h3 className="modal-titulo">Confirmar Entrega</h3>
-        <p className="modal-desc">
-          Informe o PIN de 4 dígitos da doação. A confirmação é exclusiva do administrador.
-        </p>
-        <input
-          type="text"
-          className="modal-input"
-          placeholder="PIN de 4 dígitos"
-          value={pin}
-          maxLength={4}
-          onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
-          onKeyDown={(e) => e.key === "Enter" && pin.length === 4 && onConfirmar(pin)}
-          style={{ marginTop: 8, letterSpacing: 8, textAlign: "center", fontSize: "1.2rem" }}
-        />
-        <div className="modal-acoes">
-          <button className="modal-btn-cancelar" onClick={onCancelar} disabled={loading}>
-            Cancelar
-          </button>
-          <button
-            className="modal-btn-confirmar"
-            onClick={() => onConfirmar(pin)}
-            disabled={loading || pin.length !== 4}
-          >
-            {loading ? (
-              <span className="modal-btn-inner">
-                <span className="modal-spinner" />
-                Confirmando...
-              </span>
-            ) : "Confirmar"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 const Doacao = () => {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
@@ -91,14 +49,14 @@ const Doacao = () => {
   const [doacoes, setDoacoes] = useState([]);
   const [editandoId, setEditandoId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [confirmando, setConfirmando] = useState(null);
-  const [modalDoacaoId, setModalDoacaoId] = useState(null);
+  const [excluindoId, setExcluindoId] = useState(null);
   const [aba, setAba] = useState("registrar");
   const navigate = useNavigate();
 
   const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado") || "null");
   const isAdmin = usuarioLogado?.role === "ROLE_ADMIN" || usuarioLogado?.role === "ADMIN";
-  const podeConfirmar = isAdmin;
+  const isOng = usuarioLogado?.role === "ROLE_ONG" || usuarioLogado?.role === "ONG";
+  const podeConfirmar = isAdmin || isOng;
 
   const fetchDoacoes = useCallback(async () => {
     if (!usuarioLogado?.id) return;
@@ -183,55 +141,77 @@ const Doacao = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Deseja deletar esta doação?")) return;
+    if (!window.confirm(
+      isAdmin
+        ? "Deseja excluir este registro de doação? Essa ação não pode ser desfeita."
+        : "Deseja deletar esta doação?"
+    )) return;
+    setExcluindoId(id);
     try {
       await axios.delete(`http://localhost:8080/doacoes/${id}`, {
         headers: { usuarioId: usuarioLogado?.id },
       });
-      toast.success("Doação deletada com sucesso!");
-      fetchDoacoes();
+      toast.success("Registro de doação excluído com sucesso!");
+      await fetchDoacoes();
     } catch (err) {
-      toast.error("Não foi possível deletar esta doação.");
-    }
-  };
-
-  const handleConfirmarEntrega = async (pin) => {
-    if (!pin) return;
-    if (!modalDoacaoId) return;
-    setConfirmando(modalDoacaoId);
-    try {
-      await axios.patch(
-        `http://localhost:8080/doacoes/${modalDoacaoId}/confirmar-entrega`,
-        {},
-        { withCredentials: true, params: { pin } }
-      );
-      toast.success("Entrega confirmada com sucesso!");
-      setModalDoacaoId(null);
-      fetchDoacoes();
-    } catch (err) {
-      const msg = err.response?.data?.message || err.response?.data || "Erro ao confirmar entrega.";
+      const msg = err.response?.data?.message || err.response?.data || "Não foi possível excluir esta doação.";
       toast.error(msg);
     } finally {
-      setConfirmando(null);
+      setExcluindoId(null);
     }
   };
 
+  /* ── Ícones puramente decorativos (não interferem em nenhuma lógica) ── */
+  const svgProps = {
+    className: "field-icon",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.7,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    "aria-hidden": true,
+    focusable: "false",
+  };
+
+  const iconUser = (
+    <svg {...svgProps}>
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+
+  const iconMail = (
+    <svg {...svgProps}>
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+    </svg>
+  );
+
+  const iconBuilding = (
+    <svg {...svgProps}>
+      <path d="M4 22V4a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v18" />
+      <path d="M15 10h3a2 2 0 0 1 2 2v10" />
+      <path d="M2 22h20" />
+      <path d="M8.5 7h2.5M8.5 11h2.5M8.5 15h2.5" />
+    </svg>
+  );
+
+  const iconBox = (
+    <svg {...svgProps}>
+      <path d="m21 8-9-5-9 5v8l9 5 9-5V8Z" />
+      <path d="m3 8 9 5 9-5" />
+      <path d="M12 13v8" />
+    </svg>
+  );
 
   return (
     <div className="page-wrapper">
       <AuroraBg />
 
-      {modalDoacaoId && (
-        <ModalConfirmarEntrega
-          loading={confirmando === modalDoacaoId}
-          onConfirmar={handleConfirmarEntrega}
-          onCancelar={() => setModalDoacaoId(null)}
-        />
-      )}
-
-
       <div className="page-content">
         <div className="cadastro-container">
+          <span className="donation-eyebrow">Give Net · Plataforma de Doações</span>
           <h2 className="cadastro-title">
             {editandoId ? "Editar Doação" : "Doações"}
           </h2>
@@ -280,24 +260,41 @@ const Doacao = () => {
 
           {aba === "registrar" && (
             <form onSubmit={handleSubmit} className="cadastro-form">
+              <div className="donation-form-head">
+                <h3 className="donation-form-title">
+                  {editandoId ? "Editar doação" : "Agendar doação"}
+                </h3>
+                <p className="donation-form-sub">
+                  Escolha a organização, o item, a data e o horário para realizar sua doação.
+                </p>
+              </div>
               <div className="form-group">
                 <label className="form-label">Nome</label>
-                <input type="text" className="form-input" value={nome}
-                  onChange={(e) => setNome(e.target.value)} placeholder="Seu nome" required />
+                <div className="field-wrap">
+                  {iconUser}
+                  <input type="text" className="form-input" value={nome}
+                    onChange={(e) => setNome(e.target.value)} placeholder="Seu nome" required />
+                </div>
               </div>
               <div className="form-group">
                 <label className="form-label">E-mail</label>
-                <input type="email" className="form-input" value={email}
-                  onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" required />
+                <div className="field-wrap">
+                  {iconMail}
+                  <input type="email" className="form-input" value={email}
+                    onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" required />
+                </div>
               </div>
               <div className="form-group">
                 <label className="form-label">ONG Destino</label>
-                <select className="form-input" value={ong} onChange={(e) => { setOng(e.target.value); setHorario(""); }} required>
+                <div className="field-wrap">
+                  {iconBuilding}
+                  <select className="form-input" value={ong} onChange={(e) => { setOng(e.target.value); setHorario(""); }} required>
                   <option value="">Selecione uma ONG</option>
                   <option value="WWF Brasil">WWF Brasil</option>
                   <option value="Instituto Ayrton Senna">Instituto Ayrton Senna</option>
                   <option value="AACD">AACD</option>
-                </select>
+                  </select>
+                </div>
               </div>
               <div className="form-group">
                 <label className="form-label">O que essa ONG aceita</label>
@@ -320,9 +317,12 @@ const Doacao = () => {
               </div>
               <div className="form-group">
                 <label className="form-label">Item que será doado</label>
-                <input type="text" className="form-input" value={itemDoado}
-                  onChange={(e) => setItemDoado(e.target.value)}
-                  placeholder="Ex: Caixas de remédio, roupas infantis..." />
+                <div className="field-wrap">
+                  {iconBox}
+                  <input type="text" className="form-input" value={itemDoado}
+                    onChange={(e) => setItemDoado(e.target.value)}
+                    placeholder="Ex: Caixas de remédio, roupas infantis..." />
+                </div>
               </div>
               <div className="form-group">
                 <label className="form-label">Horário de Coleta</label>
@@ -344,8 +344,11 @@ const Doacao = () => {
                 </div>
                 {horario && <span className="horario-preview">Coleta agendada para às {horario}h</span>}
               </div>
-              <button type="submit" className="btn-cadastrar">
-                {editandoId ? "Salvar Alterações" : "Registrar Doação"}
+              <button type="submit" className="btn-cadastrar btn-donacao">
+                <span className="btn-donacao-label">
+                  {editandoId ? "Salvar Alterações" : "Registrar Doação"}
+                </span>
+                <span className="btn-donacao-arrow" aria-hidden="true">→</span>
               </button>
               {editandoId && (
                 <button type="button" onClick={handleCancelarEdicao}
@@ -373,8 +376,10 @@ const Doacao = () => {
                       key={doacao.id}
                       doacao={doacao}
                       podeConfirmar={podeConfirmar}
-                      onConfirmar={(id) => setModalDoacaoId(id)}
-                      confirmando={confirmando === doacao.id}
+                      onConfirmar={(id) => navigate(`/confirmar-doacao?doacao=${encodeURIComponent(id)}`)}
+                      podeExcluirConcluidas={isAdmin}
+                      onExcluir={handleDelete}
+                      excluindo={excluindoId === doacao.id}
                     />
                   ))}
                 </div>
@@ -418,14 +423,14 @@ const Doacao = () => {
                             Editar
                           </button>
                         )}
-                        {!isEntregue && (
+                        {(!isEntregue || isAdmin) && (
                           <button onClick={() => handleDelete(doacao.id)} className="btn-deletar">
-                            Deletar
+                            {excluindoId === doacao.id ? "Excluindo..." : isEntregue ? "Excluir registro" : "Deletar"}
                           </button>
                         )}
                         {podeConfirmar && !isEntregue && (
                           <button
-                            onClick={() => setModalDoacaoId(doacao.id)}
+                            onClick={() => navigate(`/confirmar-doacao?doacao=${encodeURIComponent(doacao.id)}`)}
                             className="btn-cadastrar"
                             style={{
                               padding: "6px 14px", fontSize: 12,
@@ -433,9 +438,8 @@ const Doacao = () => {
                               borderColor: "rgba(168,85,247,0.4)",
                               color: "#4ade80",
                             }}
-                            disabled={confirmando === doacao.id}
                           >
-                            {confirmando === doacao.id ? "..." : "Confirmar"}
+                            Confirmar Entrega
                           </button>
                         )}
                       </div>

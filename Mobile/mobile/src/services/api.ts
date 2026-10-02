@@ -5,6 +5,7 @@ import { Usuario, Ong, Doacao, DoacaoDTO, DoacaoStatusHistory, ChatMessage } fro
 import { ONG_DETAILS } from '@/constants/data';
 
 const STORAGE_KEY_API_URL = '@givenet_api_url';
+export const STORAGE_KEY_TOKEN = '@givenet_token';
 
 const getExpoHost = (): string | null => {
   const hostUri = Constants.expoConfig?.hostUri;
@@ -101,6 +102,19 @@ export class ApiService {
       Accept: 'application/json',
       ...((options.headers as Record<string, string>) || {}),
     };
+    const method = (options.method || 'GET').toUpperCase();
+    const path = endpoint.split('?')[0];
+    const isPublicRequest =
+      (method === 'POST' && (path === '/usuarios' || path === '/usuarios/login')) ||
+      (method === 'GET' && (path === '/ongs' || /^\/ongs\/\d+$/.test(path))) ||
+      ((method === 'GET' || method === 'POST') && /^\/chat(?:\/\d+)?$/.test(path));
+
+    if (!isPublicRequest) {
+      const token = await AsyncStorage.getItem(STORAGE_KEY_TOKEN);
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+    }
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
@@ -187,7 +201,11 @@ export class ApiService {
             icon: detail.icon || '🏢',
             cor: detail.cor || '#7c3aed',
             corClara: detail.corClara || '#ede9fe',
-            sobre: o.restricoes ? `${o.restricoes}. ${detail.sobre || ''}` : detail.sobre || 'ONG Parceira GiveNet',
+            sobre:
+              o.sobre ||
+              (o.restricoes
+                ? `${o.restricoes}. ${detail.sobre || ''}`
+                : detail.sobre || 'ONG Parceira GiveNet'),
             tiposAceitos: Array.isArray(o.tiposAceitos)
               ? o.tiposAceitos
               : typeof o.tiposAceitos === 'string'
@@ -279,24 +297,11 @@ export class ApiService {
 
   public static async confirmarEntrega(
     id: number,
-    options: {
-      pin?: string;
-      adminEmail?: string;
-      adminSenha?: string;
-      usuarioId?: number;
-      usuarioSenha?: string;
-    }
+    options: { pin?: string }
   ): Promise<Doacao> {
-    const headers: Record<string, string> = {};
-    if (options.usuarioId) headers.usuarioId = String(options.usuarioId);
-    if (options.adminEmail) headers.adminEmail = options.adminEmail;
-    if (options.adminSenha) headers.adminSenha = options.adminSenha;
-    if (options.usuarioSenha) headers.usuarioSenha = options.usuarioSenha;
-
     const query = options.pin ? `?pin=${encodeURIComponent(options.pin)}` : '';
     return this.request<Doacao>(`/doacoes/${id}/confirmar-entrega${query}`, {
       method: 'PATCH',
-      headers,
     });
   }
 

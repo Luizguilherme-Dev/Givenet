@@ -10,7 +10,7 @@ import {
   RefreshControl,
   Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Header } from '@/components/Header';
 import { CardDoacao } from '@/components/CardDoacao';
@@ -21,6 +21,7 @@ import { Ong, Doacao, DoacaoDTO } from '@/types';
 
 export default function DoacaoScreen() {
   const router = useRouter();
+  const { ongId } = useLocalSearchParams<{ ongId?: string }>();
   const { usuario, isAuthenticated, isAdmin, isOng } = useAuth();
 
   const [aba, setAba] = useState<'registrar' | 'agendamentos' | 'lista'>('registrar');
@@ -44,9 +45,16 @@ export default function DoacaoScreen() {
     try {
       const data = await ApiService.getOngs();
       setOngs(data);
-      if (data.length > 0 && !selectedOng) {
-        setSelectedOng(data[0]);
-      }
+      if (data.length === 0) return;
+      // Preserva a ONG já escolhida; caso contrário usa a ONG recebida por parâmetro
+      // (ex.: vinda do botão "Doar" de um card) ou a primeira da lista.
+      setSelectedOng((atual) => {
+        if (atual) {
+          return data.find((o) => o.id === atual.id) || atual;
+        }
+        const solicitada = ongId ? data.find((o) => String(o.id) === String(ongId)) : undefined;
+        return solicitada || data[0];
+      });
     } catch (e) {
       console.error('Erro ao carregar ONGs:', e);
     }
@@ -206,6 +214,11 @@ export default function DoacaoScreen() {
   };
 
   const handleConfirmarPin = async (id: number, pin: string) => {
+    if (!isAdmin && !isOng) {
+      Alert.alert('Acesso restrito', 'Somente ONGs e administradores podem confirmar entregas.');
+      return;
+    }
+
     try {
       await ApiService.confirmarEntrega(id, { pin });
       Alert.alert('Sucesso', 'Entrega confirmada com sucesso via PIN!');
@@ -251,7 +264,7 @@ export default function DoacaoScreen() {
           >
             <Ionicons name="shield-checkmark" size={18} color={GiveNetTheme.success} />
             <Text style={styles.adminBannerText}>
-              Painel de Confirmação de Entregas (Admin)
+              Painel de Confirmação de Entregas (ONG/Admin)
             </Text>
             <Ionicons name="chevron-forward" size={16} color={GiveNetTheme.success} />
           </TouchableOpacity>

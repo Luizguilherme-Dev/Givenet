@@ -4,6 +4,7 @@ export interface Usuario {
   email: string;
   telefone?: string;
   role?: 'USER' | 'ADMIN' | 'ONG' | string;
+  token?: string;
   dataCadastro?: string;
   foto?: string;
 }

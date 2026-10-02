@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/contexts/AuthContext';
 import { GiveNetTheme } from '@/constants/colors';
+import { Glass, Radius, Shadow, Type } from '@/constants/design';
 import { ModalServerConfig } from './ModalServerConfig';
 import { ApiService } from '@/services/api';
+
+/** Blur real no iOS; no Android mantém a superfície translúcida sem blurTarget. */
+const supportsBlur = Platform.OS === 'ios' || (Platform.OS === 'android' && Number(Platform.Version) >= 31);
 
 export const Header: React.FC<{ title?: string; showBack?: boolean }> = ({
   title,
@@ -13,6 +19,7 @@ export const Header: React.FC<{ title?: string; showBack?: boolean }> = ({
 }) => {
   const router = useRouter();
   const { usuario, isAuthenticated, apiUrl } = useAuth();
+  const insets = useSafeAreaInsets();
   const [modalServerVisible, setModalServerVisible] = useState(false);
   const [serverOnline, setServerOnline] = useState<boolean | null>(null);
 
@@ -34,7 +41,20 @@ export const Header: React.FC<{ title?: string; showBack?: boolean }> = ({
 
   return (
     <>
-      <View style={styles.container}>
+      <View style={[styles.container, { paddingTop: insets.top + 8 }]}>
+        {/* Camada glass discreta */}
+        <View style={StyleSheet.absoluteFill} pointerEvents="none">
+          {supportsBlur ? (
+            <BlurView
+              intensity={Glass.intensity}
+              tint="dark"
+              blurMethod={Platform.OS === 'android' ? Glass.androidMethod : undefined}
+              style={StyleSheet.absoluteFill}
+            />
+          ) : null}
+          <View style={[StyleSheet.absoluteFill, styles.glassTint]} />
+        </View>
+
         <View style={styles.leftSection}>
           {showBack ? (
             <TouchableOpacity
@@ -64,7 +84,7 @@ export const Header: React.FC<{ title?: string; showBack?: boolean }> = ({
             </TouchableOpacity>
           )}
 
-          {title && <Text style={styles.headerTitle}>{title}</Text>}
+          {title && <Text style={styles.headerTitle} numberOfLines={1}>{title}</Text>}
         </View>
 
         <View style={styles.rightSection}>
@@ -134,10 +154,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: GiveNetTheme.cardBackground,
+    paddingBottom: 12,
+    backgroundColor: 'rgba(18, 11, 34, 0.82)',
     borderBottomWidth: 1,
-    borderBottomColor: GiveNetTheme.border,
+    borderBottomColor: Glass.border,
+  },
+  glassTint: {
+    backgroundColor: 'rgba(15, 9, 31, 0.45)',
   },
   leftSection: {
     flexDirection: 'row',
@@ -146,10 +169,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: GiveNetTheme.cardSecondary,
+    width: 40,
+    height: 40,
+    borderRadius: Radius.pill,
+    backgroundColor: 'rgba(255, 255, 255, 0.07)',
+    borderWidth: 1,
+    borderColor: Glass.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -159,64 +184,61 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   logoBadge: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 38,
+    height: 38,
+    borderRadius: Radius.sm,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
-    shadowColor: GiveNetTheme.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 4,
-    elevation: 4,
+    ...Shadow.glow,
   },
   logoImage: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 34,
+    height: 34,
+    borderRadius: 11,
   },
   brandTitle: {
-    fontSize: 16,
-    fontWeight: '800',
+    fontSize: 17,
+    fontWeight: '900',
     color: GiveNetTheme.textPrimary,
-    letterSpacing: 0.5,
+    letterSpacing: -0.2,
   },
   brandSubtitle: {
+    ...Type.caption,
     fontSize: 10,
+    fontWeight: '600',
     color: GiveNetTheme.textSecondary,
-    fontWeight: '500',
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
+    ...Type.subheading,
     color: GiveNetTheme.textPrimary,
-    marginLeft: 8,
+    marginLeft: 4,
+    flexShrink: 1,
   },
   rightSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
   },
   serverBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 5,
-    borderRadius: 12,
-    backgroundColor: GiveNetTheme.cardSecondary,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: Radius.pill,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
     borderWidth: 1,
-    borderColor: GiveNetTheme.borderLight,
+    borderColor: Glass.border,
   },
   serverOnline: {
     borderColor: 'rgba(16, 185, 129, 0.4)',
-    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
   },
   serverOffline: {
     borderColor: 'rgba(239, 68, 68, 0.4)',
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
   },
   serverDot: {
     width: 7,
@@ -224,8 +246,8 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   serverText: {
-    fontSize: 11,
-    fontWeight: '700',
+    ...Type.caption,
+    fontWeight: '800',
     color: GiveNetTheme.textSecondary,
   },
   loginButton: {
@@ -233,22 +255,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 5,
     backgroundColor: GiveNetTheme.primary,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: Radius.pill,
+    minHeight: 38,
+    ...Shadow.glow,
   },
   loginButtonText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   avatarButton: {
     padding: 2,
   },
   avatarBadge: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 38,
+    height: 38,
+    borderRadius: Radius.pill,
     backgroundColor: GiveNetTheme.primaryDark,
     borderWidth: 2,
     borderColor: GiveNetTheme.primaryLight,
@@ -257,7 +281,7 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     color: '#FFFFFF',
-    fontWeight: '800',
-    fontSize: 14,
+    fontWeight: '900',
+    fontSize: 15,
   },
 });

@@ -1,6 +1,8 @@
 package com.itb.inf3bn.givenet.controller;
 
-import com.itb.inf3bn.givenet.config.AdminCheck;
+import com.itb.inf3bn.givenet.config.AuthenticatedUser;
+import com.itb.inf3bn.givenet.config.JwtService;
+import com.itb.inf3bn.givenet.dto.LoginResponse;
 import com.itb.inf3bn.givenet.dto.PerfilUsuarioDTO;
 import com.itb.inf3bn.givenet.dto.UsuarioDTO;
 import com.itb.inf3bn.givenet.model.entity.AuditLog;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -26,27 +29,22 @@ public class UsuarioController {
     private UsuarioRepository repository;
 
     @Autowired
-    private AdminCheck adminCheck;
+    private AuditLogRepository auditLogRepository;
 
     @Autowired
-    private AuditLogRepository auditLogRepository;
+    private JwtService jwtService;
 
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @GetMapping
-    public List<Usuario> listar(@RequestHeader("adminEmail") String email,
-                                @RequestHeader("adminSenha") String senha) {
-        adminCheck.verificar(email, senha);
+    public List<Usuario> listar() {
         return repository.findAll();
     }
 
     @GetMapping("/{id}")
-    public Usuario buscar(@PathVariable Long id,
-                          @RequestHeader("usuarioId") Long solicitanteId,
-                          @RequestHeader(value = "adminEmail", required = false) String adminEmail,
-                          @RequestHeader(value = "adminSenha", required = false) String adminSenha) {
-        if (!solicitanteId.equals(id)) {
-            adminCheck.verificar(adminEmail, adminSenha);
+    public Usuario buscar(@PathVariable Long id, @AuthenticationPrincipal AuthenticatedUser solicitante) {
+        if (!solicitante.id().equals(id) && !"ADMIN".equals(solicitante.role())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado");
         }
         return repository.findById(id).orElseThrow();
     }
@@ -64,9 +62,9 @@ public class UsuarioController {
 
     @PutMapping("/{id}/perfil")
     public Usuario atualizarPerfil(@PathVariable Long id,
-                                   @RequestHeader("usuarioId") Long solicitanteId,
+                                   @AuthenticationPrincipal AuthenticatedUser solicitante,
                                    @RequestBody PerfilUsuarioDTO dto) {
-        if (!id.equals(solicitanteId)) {
+        if (!id.equals(solicitante.id())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado");
         }
 
@@ -103,22 +101,29 @@ public class UsuarioController {
         Optional<Usuario> usuario = repository.findByEmail(email);
         if (usuario.isPresent() && encoder.matches(senha, usuario.get().getSenha())) {
             usuario.get().setRole(usuario.get().getRole().toUpperCase());
+            if ("BLOQUEADO".equals(usuario.get().getRole())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Conta bloqueada. Entre em contato com o suporte.");
+            }
             auditLogRepository.save(AuditLog.builder()
                     .usuarioId(usuario.get().getId())
                     .acao("LOGIN")
                     .detalhe("Login realizado com sucesso")
                     .build());
-            return ResponseEntity.ok(usuario.get());
+            Usuario autenticado = usuario.get();
+            return ResponseEntity.ok(new LoginResponse(
+                    autenticado.getId(),
+                    autenticado.getNome(),
+                    autenticado.getEmail(),
+                    autenticado.getTelefone(),
+                    autenticado.getRole(),
+                    jwtService.generateToken(autenticado.getId())));
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email ou senha incorretos");
     }
 
     @PutMapping("/{id}")
     public Usuario atualizar(@PathVariable Long id,
-                             @RequestHeader("adminEmail") String email,
-                             @RequestHeader("adminSenha") String senha,
                              @RequestBody UsuarioDTO dto) {
-        adminCheck.verificar(email, senha);
         Usuario usuario = repository.findById(id).orElseThrow();
         usuario.setNome(dto.getNome());
         usuario.setEmail(dto.getEmail());
@@ -135,10 +140,7 @@ public class UsuarioController {
     }
 
     @DeleteMapping("/{id}")
-    public void deletar(@PathVariable Long id,
-                        @RequestHeader("adminEmail") String email,
-                        @RequestHeader("adminSenha") String senha) {
-        adminCheck.verificar(email, senha);
+    public void deletar(@PathVariable Long id) {
         auditLogRepository.save(AuditLog.builder()
                 .usuarioId(id)
                 .acao("DELETAR_USUARIO")

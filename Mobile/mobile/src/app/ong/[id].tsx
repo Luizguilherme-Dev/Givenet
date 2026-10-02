@@ -234,7 +234,7 @@ export default function OngDetalheScreen() {
       <View style={styles.stickyFooter}>
         <TouchableOpacity
           style={[styles.donateCTA, { backgroundColor: ong.cor || GiveNetTheme.primary }]}
-          onPress={() => router.push('/(tabs)/doacao')}
+          onPress={() => router.push(`/(tabs)/doacao?ongId=${ong.id}` as any)}
           activeOpacity={0.8}
         >
           <Ionicons name="heart" size={20} color="#FFFFFF" />

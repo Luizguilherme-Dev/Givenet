@@ -1,5 +1,7 @@
 // npm install react-router-dom
 import { BrowserRouter, Routes, Route, Outlet, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import PropTypes from "prop-types";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./notifications.css";
@@ -37,7 +39,7 @@ function RoutesApp() {
           <Route path="/home_api" element={<Home />} />
 
           <Route path="/Doacao" element={<RotaPrivada><Doacao /></RotaPrivada>} />
-          <Route path="/confirmar-doacao" element={<RotaAdmin><ConfirmarDoacao /></RotaAdmin>} />
+          <Route path="/confirmar-doacao" element={<RotaConfirmacao><ConfirmarDoacao /></RotaConfirmacao>} />
           <Route path="/admin" element={<RotaAdmin><Admin /></RotaAdmin>} />
           <Route path="/ong" element={<Ong />} />
           <Route path="/sou-uma-ong" element={<SolicitarOng />} />
@@ -52,6 +54,13 @@ function RoutesApp() {
 
 // Layout padrão com o menu fixo em todas as páginas
 function Layout() {
+  useEffect(() => {
+    // Ponte de teste: permite disparar toasts reais pelo console/QA.
+    // Não altera nenhuma lógica nem as chamadas existentes.
+    window.__gnToastify = { toast };
+    return () => { delete window.__gnToastify; };
+  }, []);
+
   return (
     <>
       <Navbar />
@@ -77,6 +86,23 @@ function RotaAdmin({ children }) {
   }
   return children;
 }
+
+function RotaConfirmacao({ children }) {
+  const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado") || "null");
+  const podeConfirmar = ["ADMIN", "ROLE_ADMIN", "ONG", "ROLE_ONG"].includes(usuarioLogado?.role);
+  if (!podeConfirmar) {
+    toast.warning("Somente ONGs e administradores podem confirmar entregas.", {
+      position: "top-center",
+      toastId: "confirmacao-negada",
+    });
+    return <Navigate to="/" replace />;
+  }
+  return children;
+}
+
+RotaConfirmacao.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
 function RotaPrivada({ children }) {
   const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado"));
