@@ -19,3 +19,29 @@ BEGIN
     );
 END;
 GO
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = N'ux_ong_solicitacao_email_pendente'
+      AND object_id = OBJECT_ID(N'dbo.ong_solicitacao')
+)
+BEGIN
+    CREATE UNIQUE INDEX ux_ong_solicitacao_email_pendente
+        ON dbo.ong_solicitacao (email)
+        WHERE status = 'PENDENTE';
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = N'ux_ong_solicitacao_cnpj_pendente'
+      AND object_id = OBJECT_ID(N'dbo.ong_solicitacao')
+)
+BEGIN
+    CREATE UNIQUE INDEX ux_ong_solicitacao_cnpj_pendente
+        ON dbo.ong_solicitacao (cnpj)
+        WHERE status = 'PENDENTE' AND cnpj IS NOT NULL;
+END;
+GO

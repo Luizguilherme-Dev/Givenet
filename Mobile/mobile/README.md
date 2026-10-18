@@ -13,7 +13,7 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 2. Start the app
 
    ```bash
-   npx expo start
+   npx expo start --lan --clear
    ```
 
 In the output, you'll find options to open the app in a
@@ -22,6 +22,23 @@ In the output, you'll find options to open the app in a
 - [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
 - [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
 - [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+
+## Backend Spring Boot no Expo Go (Android)
+
+O backend escuta na porta `8080`. Para o Expo Go em um celular físico:
+
+1. Inicie o backend Spring Boot e confirme que `http://<IP_DO_COMPUTADOR>:8080/ongs` responde.
+2. Descubra o IPv4 da interface Wi-Fi do computador (`ipconfig`) e configure `Mobile/mobile/.env.local`:
+
+   ```dotenv
+   EXPO_PUBLIC_API_URL=http://<IP_DO_COMPUTADOR>:8080
+   ```
+
+   Substitua o marcador pelo IPv4 real do computador. O arquivo `.env.local` é local e ignorado pelo Git; atualize o endereço se o IP mudar.
+3. Conecte o celular e o computador à mesma rede Wi-Fi, permita conexões de entrada na porta TCP `8080` no Firewall do Windows e reinicie o Metro com `npx expo start --lan --clear` para carregar a variável.
+4. Abra o app pelo QR Code do Metro no Expo Go.
+
+Não use `localhost` ou `127.0.0.1` no endereço da API do celular: esses endereços apontam para o próprio Android. O endpoint `/ongs` é público; rotas de perfil e doações exigem autenticação e o token Bearer recebido no login.
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 

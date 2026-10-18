@@ -29,7 +29,7 @@ const cards = [
     alt: "Equipe trabalhando em colaboração"
   },
   {
-    image: "https://images.unsplash.com/photo-1517486808906-6ca8b1d0e5d4?auto=format&fit=crop&w=1200&q=80",
+    image: "https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?auto=format&fit=crop&w=1200&q=80",
     label: "Faça Parte",
     description: "Junte-se a milhares de pessoas que já estão transformando vidas e fazendo a diferença todos os dias.",
     alt: "Pessoa participando de ação solidária"

@@ -47,7 +47,7 @@ public class OngController {
 
         String email = dto.getEmail().trim().toLowerCase(Locale.ROOT);
         String cnpj = dto.getCnpj() == null ? "" : dto.getCnpj().trim();
-        if (usuarioRepository.findByEmail(email).isPresent() || repository.existsByEmailIgnoreCase(email)) {
+        if (usuarioRepository.findByEmailIgnoreCase(email).isPresent() || repository.existsByEmailIgnoreCase(email)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Este e-mail já está cadastrado.");
         }
         if (solicitacaoRepository.existsByEmailIgnoreCaseAndStatus(email, "PENDENTE")) {
@@ -121,7 +121,7 @@ public class OngController {
 
     private void aprovarSolicitacao(OngSolicitacao solicitacao) {
         exigirStatus(solicitacao, "PENDENTE");
-        if (usuarioRepository.findByEmail(solicitacao.getEmail()).isPresent()
+        if (usuarioRepository.findByEmailIgnoreCase(solicitacao.getEmail()).isPresent()
                 || repository.existsByEmailIgnoreCase(solicitacao.getEmail())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "O e-mail já está associado a uma conta.");
         }

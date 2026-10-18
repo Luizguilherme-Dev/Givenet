@@ -176,10 +176,11 @@ export default function CadastroScreen() {
                 placeholderTextColor={GiveNetTheme.textPlaceholder}
                 value={telefone}
                 onChangeText={(val) => {
-                  setTelefone(val);
+                  setTelefone(val.replace(/\D/g, '').slice(0, 11));
                   setFeedback(null);
                 }}
                 keyboardType="phone-pad"
+                maxLength={11}
               />
             </View>
           </View>
@@ -247,6 +248,13 @@ export default function CadastroScreen() {
               <Text style={styles.submitBtnText}>Criar Minha Conta</Text>
             )}
           </TouchableOpacity>
+
+          <View style={styles.footerRow}>
+            <Text style={styles.footerText}>Representa uma organização? </Text>
+            <TouchableOpacity onPress={() => router.push('/cadastro-ong')}>
+              <Text style={styles.footerLink}>Sou uma ONG</Text>
+            </TouchableOpacity>
+          </View>
 
           <View style={styles.footerRow}>
             <Text style={styles.footerText}>Já possui cadastro? </Text>

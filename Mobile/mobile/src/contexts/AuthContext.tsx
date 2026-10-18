@@ -140,9 +140,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateApiUrl = async (url: string): Promise<{ ok: boolean; message: string }> => {
     try {
+      const test = await ApiService.testConnection(url);
+      if (!test.ok) {
+        return test;
+      }
       await ApiService.setBaseUrl(url);
       setApiUrl(ApiService.getBaseUrl());
-      const test = await ApiService.testConnection(url);
       return test;
     } catch (err: any) {
       return { ok: false, message: err?.message || 'Erro ao definir URL' };

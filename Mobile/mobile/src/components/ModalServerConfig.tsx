@@ -8,6 +8,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   TouchableWithoutFeedback,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GiveNetTheme } from '@/constants/colors';
@@ -26,9 +27,12 @@ export const ModalServerConfig: React.FC<Props> = ({ visible, onClose }) => {
   const [statusMsg, setStatusMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
   const presets = [
-    { label: 'Wi-Fi Local (PC)', url: ApiService.getBaseUrl() },
-    { label: 'Emulador Android', url: 'http://10.0.2.2:8080' },
-    { label: 'Localhost / Web', url: 'http://localhost:8080' },
+    ...(ApiService.getBaseUrl()
+      ? [{ label: 'Wi-Fi (computador via Expo)', url: ApiService.getBaseUrl() }]
+      : []),
+    ...(Platform.OS === 'android'
+      ? []
+      : [{ label: 'Localhost / Web', url: 'http://localhost:8080' }]),
   ];
 
   const handleTest = async () => {

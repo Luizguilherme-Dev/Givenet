@@ -61,9 +61,26 @@ function Cadastro() {
       <AuroraBg />
 
       <div className="cadastro-form-container">
+        <header className="cadastro-page-header">
+          <span className="cadastro-header-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="10" cy="7" r="4" />
+              <path d="M20 8v6M23 11h-6" />
+            </svg>
+          </span>
+          <div className="cadastro-header-copy">
+            <h1>Criar conta</h1>
+            <p>Cadastre-se para acompanhar e organizar suas doações.</p>
+          </div>
+          <span className="cadastro-access-badge">Cadastro de usuário</span>
+        </header>
+
         <form className="cadastro-form" onSubmit={handleSubmit}>
-          <h2>Criar Conta</h2>
-          <p>Preencha os dados para se cadastrar</p>
+          <div className="cadastro-section-heading">
+            <h2>Dados pessoais</h2>
+            <p>Preencha os campos abaixo para criar sua conta GiveNet.</p>
+          </div>
 
           <div className="cadastro-fields">
             <div className="cadastro-field">

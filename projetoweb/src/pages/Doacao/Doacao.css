@@ -648,6 +648,388 @@
   to { transform: rotate(360deg); }
 }
 
+/* Layout alinhado ao formulário de confirmação de entrega */
+.page-wrapper.page-wrapper {
+  background: #100d1d !important;
+}
+
+.page-wrapper > .aurora-bg {
+  opacity: 0.12;
+}
+
+.page-content {
+  padding: 112px 24px 64px;
+}
+
+.cadastro-container {
+  display: flex;
+  max-width: 960px !important;
+  flex-direction: column;
+  gap: 20px;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  overflow: visible;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.donation-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  padding: 4px 2px 8px;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none;
+  color: inherit;
+  position: static;
+  height: auto;
+}
+
+.donation-header-icon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  place-items: center;
+  color: #c4a1f4;
+  background: #211a32;
+  border: 1px solid #3a2d50;
+  border-radius: 14px;
+}
+
+.donation-header-icon svg {
+  width: 27px;
+  height: 27px;
+}
+
+.donation-header-copy {
+  min-width: 0;
+}
+
+.donation-header-copy h1 {
+  margin: 0;
+  color: #f8f5fc;
+  font-size: clamp(1.5rem, 3vw, 1.85rem);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+.donation-header-copy p {
+  margin: 6px 0 0;
+  color: #b8aec9;
+  font-size: 0.95rem;
+}
+
+.donation-access-badge {
+  margin-left: auto;
+  padding: 8px 12px;
+  color: #cfc2df;
+  background: #211a32;
+  border: 1px solid #3a2d50;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.btn-confirmar-entrega {
+  align-self: flex-start;
+  min-height: 42px;
+  padding: 0 16px;
+  color: #e7d9f7;
+  background: #302242;
+  border: 1px solid #62448a;
+  border-radius: 9px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-confirmar-entrega:hover {
+  background: #3b2a50;
+  border-color: #9254de;
+}
+
+.tabs {
+  margin: 0;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #3a2d50;
+}
+
+.tab-btn {
+  padding: 11px 16px !important;
+  color: #cfc5dc !important;
+  background: #171323 !important;
+  border: 1px solid #493a5e !important;
+  border-radius: 9px !important;
+  font-size: 0.9rem;
+}
+
+.tab-btn:hover {
+  transform: none;
+  background: #302242 !important;
+  box-shadow: none;
+}
+
+.tab-btn.active {
+  color: #fff !important;
+  background: #493064 !important;
+  border-color: #9254de !important;
+  box-shadow: inset 0 0 0 1px rgba(146, 84, 222, 0.2) !important;
+}
+
+.page-wrapper .cadastro-form {
+  max-width: none;
+  gap: 18px;
+  padding: 22px 24px;
+  background: #211a32;
+  border: 1px solid #3a2d50;
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.page-wrapper .cadastro-form::before {
+  display: none;
+}
+
+.donation-form-head {
+  padding-bottom: 18px;
+  margin: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.donation-form-title {
+  color: #f8f5fc;
+  font-size: 1.05rem;
+  letter-spacing: 0;
+}
+
+.donation-form-sub {
+  color: #b8aec9;
+  font-size: 0.88rem;
+}
+
+.donation-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.donation-grid-wide {
+  grid-column: 1 / -1;
+}
+
+.page-wrapper .cadastro-form .form-group {
+  min-width: 0;
+  gap: 7px;
+  animation: none;
+}
+
+.page-wrapper .cadastro-form .form-label {
+  color: #e4dced !important;
+  font-size: 0.83rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.page-wrapper .cadastro-form .form-input,
+.page-wrapper .cadastro-form .field-wrap .form-input {
+  height: 46px;
+  padding-top: 0 !important;
+  padding-right: 13px !important;
+  padding-bottom: 0 !important;
+  color: #f8f5fc !important;
+  background-color: #171323 !important;
+  border: 1px solid #493a5e !important;
+  border-radius: 9px !important;
+  font-size: 0.92rem !important;
+}
+
+.page-wrapper .cadastro-form .field-wrap .form-input {
+  padding-left: 46px !important;
+}
+
+.page-wrapper .cadastro-form .form-input::placeholder {
+  color: #8f849f !important;
+}
+
+.page-wrapper .cadastro-form .form-input:focus {
+  border-color: #9254de !important;
+  background: #171323 !important;
+  box-shadow: 0 0 0 3px rgba(146, 84, 222, 0.22) !important;
+}
+
+.page-wrapper .cadastro-form .form-input[type="date"] {
+  color-scheme: dark;
+}
+
+.page-wrapper .cadastro-form select.form-input option {
+  background: #211a32 !important;
+  color: #f8f5fc !important;
+}
+
+.page-wrapper .cadastro-form .ong-aceita {
+  background: #171323 !important;
+  border: 1px solid #493a5e !important;
+  border-radius: 9px;
+  color: #b8aec9 !important;
+}
+
+.page-wrapper .cadastro-form .ong-chip {
+  background: #171323;
+  border: 1px solid #493a5e;
+  color: #cfc5dc;
+}
+
+.page-wrapper .cadastro-form .ong-chip:hover {
+  background: #302242 !important;
+  border-color: #9254de;
+  box-shadow: none;
+  transform: none;
+}
+
+.page-wrapper .cadastro-form .ong-chip-ativo {
+  color: #fff !important;
+  background: #493064 !important;
+  border-color: #9254de !important;
+  box-shadow: inset 0 0 0 1px rgba(146, 84, 222, 0.2);
+}
+
+.page-wrapper .cadastro-form .horario-preview {
+  width: fit-content;
+  margin-top: 0;
+  color: #cfc5dc;
+  background: #171323;
+  border: 1px solid #493a5e;
+  border-radius: 999px;
+}
+
+.page-wrapper .cadastro-form .btn-donacao {
+  align-self: flex-start;
+  width: auto;
+  min-height: 44px;
+  margin-top: 0;
+  padding: 0 20px !important;
+  color: #fff !important;
+  background: linear-gradient(100deg, #9254de, #7540b4) !important;
+  border: 1px solid #9254de !important;
+  border-radius: 9px !important;
+  box-shadow: none;
+}
+
+.page-wrapper .cadastro-form .btn-donacao:hover {
+  background: linear-gradient(100deg, #a970f0, #9254de) !important;
+  border-color: #a970f0 !important;
+  box-shadow: 0 4px 12px rgba(67, 38, 98, 0.24);
+  transform: none;
+  filter: none;
+}
+
+.lista-titulo {
+  margin: 0;
+  padding: 20px 24px;
+  color: #f8f5fc !important;
+  background: #211a32;
+  border: 1px solid #3a2d50;
+  border-radius: 14px;
+  font-size: 1.05rem;
+  text-align: left;
+}
+
+.pacientes-lista li {
+  background: #211a32 !important;
+  border-color: #3a2d50 !important;
+  border-radius: 14px !important;
+}
+
+.pacientes-lista li:hover {
+  background: #282037 !important;
+  transform: none;
+}
+
+.paciente-info {
+  color: #b8aec9 !important;
+}
+
+.btn-deletar {
+  color: #e7d9f7 !important;
+  background: #302242 !important;
+  border-color: #62448a !important;
+}
+
+.btn-deletar:hover {
+  background: #3b2a50 !important;
+  transform: none;
+}
+
+@media (max-width: 680px) {
+  .page-content {
+    padding: 96px 18px 40px;
+  }
+
+  .donation-page-header {
+    flex-wrap: wrap;
+  }
+
+  .donation-access-badge {
+    margin-left: 68px;
+  }
+
+  .donation-fields-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .donation-grid-wide {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-content {
+    padding: 86px 14px 32px;
+  }
+
+  .donation-page-header {
+    gap: 12px;
+  }
+
+  .donation-header-icon {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+  }
+
+  .donation-access-badge {
+    margin-left: 56px;
+    font-size: 0.74rem;
+  }
+
+  .page-wrapper .cadastro-form {
+    padding: 18px 15px;
+  }
+
+  .page-wrapper .cadastro-form .btn-donacao {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tabs {
+    gap: 8px;
+  }
+
+  .tab-btn {
+    padding: 10px 8px !important;
+    font-size: 0.8rem;
+  }
+}
+
 @keyframes donation-content-in {
   from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: translateY(0); }

@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
+  BackHandler,
+  Platform,
   View,
   Text,
   StyleSheet,
@@ -11,22 +13,121 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { CameraView, useCameraPermissions, BarcodeScanningResult } from 'expo-camera';
 import { GiveNetTheme } from '@/constants/colors';
 import { useAuth } from '@/contexts/AuthContext';
 import { ApiService } from '@/services/api';
 import { Doacao } from '@/types';
 
+const extrairIdDoQrCode = (conteudo: string): number | null => {
+  try {
+    const url = new URL(conteudo);
+    const caminho = url.pathname.replace(/\/+$/, '');
+    const id = url.searchParams.get('qr');
+
+    if (!caminho.endsWith('/confirmar-doacao') || !id || !/^\d+$/.test(id)) {
+      return null;
+    }
+
+    const idNumerico = Number(id);
+    return Number.isSafeInteger(idNumerico) && idNumerico > 0 ? idNumerico : null;
+  } catch {
+    return null;
+  }
+};
+
 export default function ConfirmarScreen() {
   const router = useRouter();
   const { usuario, isAdmin, isOng, isLoading } = useAuth();
   const podeConfirmarEntrega = isAdmin || isOng;
+  const [permissaoCamera, solicitarPermissaoCamera] = useCameraPermissions();
 
   const [doacaoId, setDoacaoId] = useState('');
   const [doacao, setDoacao] = useState<Doacao | null>(null);
   const [buscando, setBuscando] = useState(false);
+  const [filtrosBusca, setFiltrosBusca] = useState({
+    nome: '',
+    item: '',
+    data: '',
+    horario: '',
+    id: '',
+  });
+  const [doacoesEncontradas, setDoacoesEncontradas] = useState<Doacao[]>([]);
+  const [buscandoDoacoes, setBuscandoDoacoes] = useState(false);
+  const [buscaRealizada, setBuscaRealizada] = useState(false);
   const [pin, setPin] = useState('');
   const [confirmando, setConfirmando] = useState(false);
   const [concluido, setConcluido] = useState(false);
+  const [leitorAberto, setLeitorAberto] = useState(false);
+  const qrEmProcessamento = useRef(false);
+
+  useEffect(() => {
+    if (!leitorAberto || Platform.OS === 'ios' || Platform.OS === 'web') return;
+
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      setLeitorAberto(false);
+      return true;
+    });
+
+    return () => subscription.remove();
+  }, [leitorAberto]);
+
+  const abrirLeitorQr = async () => {
+    let permissao = permissaoCamera;
+    try {
+      if (!permissao?.granted) {
+        permissao = await solicitarPermissaoCamera();
+      }
+    } catch {
+      Alert.alert(
+        'Não foi possível acessar a câmera',
+        'Permita o acesso à câmera para ler o QR Code.'
+      );
+      return;
+    }
+
+    if (!permissao?.granted) {
+      Alert.alert(
+        'Não foi possível acessar a câmera',
+        'Permita o acesso à câmera para ler o QR Code.'
+      );
+      return;
+    }
+
+    qrEmProcessamento.current = false;
+    setLeitorAberto(true);
+  };
+
+  const handleQrLido = async ({ data }: BarcodeScanningResult) => {
+    if (qrEmProcessamento.current) return;
+    qrEmProcessamento.current = true;
+    setLeitorAberto(false);
+
+    const id = extrairIdDoQrCode(data);
+    if (!id) {
+      Alert.alert('QR Code inválido', 'Não foi possível identificar a doação neste QR Code.');
+      return;
+    }
+
+    setConfirmando(true);
+    try {
+      const doacaoConfirmada = await ApiService.confirmarEntrega(id, {});
+      setDoacao(doacaoConfirmada);
+      setDoacaoId(String(doacaoConfirmada.id));
+      setPin('');
+      setConcluido(true);
+      Alert.alert('✅ Sucesso', 'Doação marcada como entregue com sucesso!');
+    } catch (err: any) {
+      const mensagem = err.message || 'Falha ao confirmar entrega.';
+      if (mensagem.toLocaleLowerCase().includes('não encontrada')) {
+        Alert.alert('QR Code inválido', mensagem);
+      } else {
+        Alert.alert('Erro', mensagem);
+      }
+    } finally {
+      setConfirmando(false);
+    }
+  };
 
   const handleBuscar = async () => {
     if (!podeConfirmarEntrega) {
@@ -54,6 +155,71 @@ export default function ConfirmarScreen() {
       Alert.alert('Não encontrada', err.message || 'Doação não encontrada com este ID.');
     } finally {
       setBuscando(false);
+    }
+  };
+
+  const handleBuscarDoacoes = async () => {
+    if (!Object.values(filtrosBusca).some((valor) => valor.trim())) {
+      Alert.alert('Atenção', 'Informe pelo menos um filtro para buscar doações.');
+      return;
+    }
+
+    setBuscandoDoacoes(true);
+    setBuscaRealizada(false);
+    setDoacao(null);
+    setDoacaoId('');
+    setPin('');
+    setConcluido(false);
+
+    try {
+      const dataBusca = filtrosBusca.data.trim().replace(
+        /^(\d{2})\/(\d{2})\/(\d{4})$/,
+        '$3-$2-$1'
+      );
+      const resultados = await ApiService.buscarDoacoes({
+        ...filtrosBusca,
+        data: dataBusca,
+      });
+      setDoacoesEncontradas(resultados);
+      setBuscaRealizada(true);
+    } catch (err: any) {
+      setDoacoesEncontradas([]);
+      Alert.alert('Erro na busca', err.message || 'Não foi possível buscar as doações.');
+    } finally {
+      setBuscandoDoacoes(false);
+    }
+  };
+
+  const selecionarDoacao = (selecionada: Doacao) => {
+    setDoacao(selecionada);
+    setDoacaoId(String(selecionada.id));
+    setPin('');
+    setConcluido(false);
+    if (selecionada.status === 'DOACAO_ENTREGUE') {
+      Alert.alert('Aviso', 'Esta doação já foi confirmada anteriormente como entregue.');
+    }
+  };
+
+  const alterarFiltroBusca = (campo: keyof typeof filtrosBusca, valor: string) => {
+    setFiltrosBusca((atual) => ({ ...atual, [campo]: valor }));
+  };
+
+  const formatarDataBusca = (data?: string) => {
+    if (!data) return '—';
+    const [ano, mes, dia] = data.slice(0, 10).split('-');
+    return ano && mes && dia ? `${dia}/${mes}/${ano}` : data;
+  };
+
+  const formatarStatusBusca = (status?: string) => {
+    switch (status) {
+      case 'AGENDADO':
+        return 'Agendada';
+      case 'DOACAO_ENTREGUE':
+        return 'Entregue';
+      case 'CANCELADO':
+        return 'Cancelada';
+      default:
+        return status || '—';
     }
   };
 
@@ -101,6 +267,36 @@ export default function ConfirmarScreen() {
 
   const nomeOng =
     typeof doacao?.ong === 'object' ? doacao?.ong?.nome : doacao?.ong || 'ONG Parceira';
+
+  if (leitorAberto && Platform.OS !== 'web') {
+    return (
+      <View style={styles.cameraContainer}>
+        <CameraView
+          style={styles.cameraPreview}
+          facing="back"
+          active
+          barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+          onBarcodeScanned={handleQrLido}
+          onMountError={({ message }) => {
+            setLeitorAberto(false);
+            Alert.alert('Não foi possível abrir a câmera', message);
+          }}
+        />
+        <View style={styles.cameraOverlay}>
+          <Text style={styles.cameraInstruction}>
+            Posicione o QR Code da doação dentro da área de leitura.
+          </Text>
+          <View style={styles.cameraFrame} />
+          <TouchableOpacity
+            style={styles.cameraCloseButton}
+            onPress={() => setLeitorAberto(false)}
+          >
+            <Text style={styles.cameraCloseButtonText}>Fechar câmera</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -157,6 +353,109 @@ export default function ConfirmarScreen() {
               Digite o ID da doação e valide pelo PIN de 4 dígitos informado pelo doador.
             </Text>
           </View>
+        </View>
+
+        {Platform.OS !== 'web' && (
+          <TouchableOpacity
+            style={styles.qrScanButton}
+            onPress={abrirLeitorQr}
+            disabled={confirmando}
+          >
+            <Ionicons name="camera-outline" size={20} color="#FFFFFF" />
+            <Text style={styles.qrScanButtonText}>Ler QR Code</Text>
+          </TouchableOpacity>
+        )}
+
+        <View style={styles.searchCard}>
+          <Text style={styles.searchSectionTitle}>Buscar doações</Text>
+          <TextInput
+            style={styles.searchFilterInput}
+            placeholder="Nome do doador"
+            placeholderTextColor={GiveNetTheme.textPlaceholder}
+            value={filtrosBusca.nome}
+            onChangeText={(valor) => alterarFiltroBusca('nome', valor)}
+          />
+          <TextInput
+            style={styles.searchFilterInput}
+            placeholder="Item doado"
+            placeholderTextColor={GiveNetTheme.textPlaceholder}
+            value={filtrosBusca.item}
+            onChangeText={(valor) => alterarFiltroBusca('item', valor)}
+          />
+          <View style={styles.filterRow}>
+            <TextInput
+              style={[styles.searchFilterInput, styles.filterInputHalf]}
+              placeholder="Data (DD/MM/AAAA)"
+              placeholderTextColor={GiveNetTheme.textPlaceholder}
+              value={filtrosBusca.data}
+              onChangeText={(valor) => alterarFiltroBusca('data', valor)}
+              inputMode="numeric"
+              keyboardType="numbers-and-punctuation"
+            />
+            <TextInput
+              style={[styles.searchFilterInput, styles.filterInputHalf]}
+              placeholder="Horário"
+              placeholderTextColor={GiveNetTheme.textPlaceholder}
+              value={filtrosBusca.horario}
+              onChangeText={(valor) => alterarFiltroBusca('horario', valor)}
+              keyboardType="numbers-and-punctuation"
+            />
+          </View>
+          <TextInput
+            style={styles.searchFilterInput}
+            placeholder="ID da doação"
+            placeholderTextColor={GiveNetTheme.textPlaceholder}
+            value={filtrosBusca.id}
+            onChangeText={(valor) => alterarFiltroBusca('id', valor.replace(/\D/g, ''))}
+            keyboardType="number-pad"
+          />
+          <TouchableOpacity
+            style={[styles.searchBtn, styles.filterSearchBtn]}
+            onPress={handleBuscarDoacoes}
+            disabled={buscandoDoacoes}
+          >
+            {buscandoDoacoes ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <>
+                <Ionicons name="search" size={16} color="#FFFFFF" />
+                <Text style={styles.searchBtnText}>Buscar doações</Text>
+              </>
+            )}
+          </TouchableOpacity>
+
+          {buscaRealizada && (
+            <View style={styles.searchResults}>
+              <Text style={styles.searchSectionTitle}>
+                {doacoesEncontradas.length
+                  ? `Resultados encontrados (${doacoesEncontradas.length})`
+                  : 'Nenhuma doação encontrada'}
+              </Text>
+              {doacoesEncontradas.map((resultado) => (
+                <View key={resultado.id} style={styles.searchResultCard}>
+                  <View style={styles.resultHeader}>
+                    <Text style={styles.resultTitle}>Doação #{resultado.id}</Text>
+                    <Text style={styles.searchResultStatus}>
+                      {formatarStatusBusca(resultado.status)}
+                    </Text>
+                  </View>
+                  <Text style={styles.searchResultText}>Doador: {resultado.nome || '—'}</Text>
+                  <Text style={styles.searchResultText}>
+                    Item: {resultado.itemDoado || resultado.itensTipo || '—'}
+                  </Text>
+                  <Text style={styles.searchResultText}>
+                    Data: {formatarDataBusca(resultado.data)} · Horário: {resultado.horario || '—'}
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.selectDonationBtn}
+                    onPress={() => selecionarDoacao(resultado)}
+                  >
+                    <Text style={styles.selectDonationBtnText}>Selecionar doação</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          )}
         </View>
 
         {/* Busca por ID */}
@@ -332,6 +631,7 @@ export default function ConfirmarScreen() {
           </View>
         )}
       </ScrollView>
+
     </View>
   );
 }
@@ -398,6 +698,66 @@ const styles = StyleSheet.create({
     marginTop: 2,
     lineHeight: 16,
   },
+  qrScanButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: GiveNetTheme.primary,
+    marginBottom: 16,
+  },
+  qrScanButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  cameraContainer: {
+    flex: 1,
+    backgroundColor: '#000000',
+  },
+  cameraPreview: {
+    ...StyleSheet.absoluteFill,
+  },
+  cameraOverlay: {
+    ...StyleSheet.absoluteFill,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 28,
+    paddingTop: 72,
+    paddingBottom: 48,
+  },
+  cameraInstruction: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+    textAlign: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    padding: 12,
+    borderRadius: 12,
+  },
+  cameraFrame: {
+    width: 260,
+    height: 260,
+    borderWidth: 3,
+    borderColor: '#FFFFFF',
+    borderRadius: 20,
+    backgroundColor: 'transparent',
+  },
+  cameraCloseButton: {
+    backgroundColor: GiveNetTheme.cardBackground,
+    borderColor: GiveNetTheme.borderLight,
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+  },
+  cameraCloseButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
   searchCard: {
     backgroundColor: GiveNetTheme.cardBackground,
     borderRadius: 20,
@@ -405,6 +765,70 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: GiveNetTheme.border,
     marginBottom: 16,
+  },
+  searchSectionTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: GiveNetTheme.textPrimary,
+    marginBottom: 10,
+  },
+  searchFilterInput: {
+    height: 44,
+    backgroundColor: GiveNetTheme.inputBackground,
+    borderWidth: 1,
+    borderColor: GiveNetTheme.inputBorder,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    color: GiveNetTheme.textPrimary,
+    fontSize: 14,
+    marginBottom: 10,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  filterInputHalf: {
+    flex: 1,
+  },
+  filterSearchBtn: {
+    justifyContent: 'center',
+    marginTop: 2,
+  },
+  searchResults: {
+    borderTopWidth: 1,
+    borderTopColor: GiveNetTheme.border,
+    marginTop: 16,
+    paddingTop: 14,
+    gap: 10,
+  },
+  searchResultCard: {
+    backgroundColor: GiveNetTheme.cardSecondary,
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: GiveNetTheme.border,
+  },
+  searchResultStatus: {
+    color: GiveNetTheme.primaryLight,
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  searchResultText: {
+    color: GiveNetTheme.textSecondary,
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  selectDonationBtn: {
+    alignItems: 'center',
+    backgroundColor: GiveNetTheme.primary,
+    borderRadius: 10,
+    paddingVertical: 9,
+    marginTop: 8,
+  },
+  selectDonationBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
   },
   fieldLabel: {
     fontSize: 12,

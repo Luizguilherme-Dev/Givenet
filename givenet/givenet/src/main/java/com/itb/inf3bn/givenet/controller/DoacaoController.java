@@ -17,14 +17,25 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.ResolverStyle;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 @RestController
 @RequestMapping("/doacoes")
 public class DoacaoController {
+
+    private static final ZoneId ZONA_HORARIOS_ONGS = ZoneId.of("America/Sao_Paulo");
+    private static final DateTimeFormatter FORMATO_HORARIO = DateTimeFormatter.ofPattern("HH:mm")
+            .withResolverStyle(ResolverStyle.STRICT);
 
     @Autowired private DoacaoRepository repository;
     @Autowired private OngRepository ongRepository;
@@ -49,6 +60,40 @@ public class DoacaoController {
     @GetMapping
     public List<Doacao> listar() {
         return repository.findAll();
+    }
+
+    @GetMapping("/buscar")
+    public List<Doacao> buscarDoacoes(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) String item,
+            @RequestParam(required = false) String data,
+            @RequestParam(required = false) String horario,
+            @RequestParam(required = false) Long id,
+            @AuthenticationPrincipal AuthenticatedUser solicitante) {
+        if (solicitante == null
+                || (!"ADMIN".equals(solicitante.role()) && !"ONG".equals(solicitante.role()))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado");
+        }
+
+        String emailOng = null;
+        if ("ONG".equals(solicitante.role())) {
+            emailOng = solicitante.email();
+            if (emailOng == null || emailOng.isBlank()) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado");
+            }
+        }
+
+        return repository.buscarDoacoes(
+                normalizarFiltro(nome),
+                normalizarFiltro(item),
+                normalizarFiltro(data),
+                normalizarFiltro(horario),
+                id,
+                emailOng);
+    }
+
+    private String normalizarFiltro(String valor) {
+        return valor == null || valor.isBlank() ? null : valor.trim().toLowerCase(Locale.ROOT);
     }
 
     @GetMapping("/ong/{ongId}")
@@ -100,6 +145,8 @@ public class DoacaoController {
         Ong ong = ongRepository.findById(dto.getOngId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "ONG não encontrada"));
 
+        validarDataEHorario(ong, dto.getData(), dto.getHorario());
+
         if (dto.getItensTipo() != null && ong.getTiposAceitos() != null) {
             List<String> aceitos = Arrays.asList(ong.getTiposAceitos().toLowerCase().split(","));
             List<String> enviados = Arrays.asList(dto.getItensTipo().toLowerCase().split(","));
@@ -131,6 +178,54 @@ public class DoacaoController {
                 .build());
 
         return salva;
+    }
+
+    private void validarDataEHorario(Ong ong, String data, String horario) {
+        if (data == null || data.isBlank() || horario == null || horario.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Data ou horário inválido ou indisponível para agendamento.");
+        }
+
+        LocalDateTime agendamento;
+        try {
+            agendamento = OffsetDateTime.parse(data)
+                    .atZoneSameInstant(ZONA_HORARIOS_ONGS)
+                    .toLocalDate()
+                    .atTime(LocalTime.parse(horario, FORMATO_HORARIO));
+        } catch (DateTimeException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Data ou horário inválido ou indisponível para agendamento.");
+        }
+
+        if (agendamento.isBefore(LocalDateTime.now(ZONA_HORARIOS_ONGS))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Data ou horário inválido ou indisponível para agendamento.");
+        }
+
+        LocalTime abertura;
+        LocalTime fechamento;
+        switch (ong.getNome()) {
+            case "WWF Brasil" -> {
+                abertura = LocalTime.of(8, 0);
+                fechamento = LocalTime.of(17, 30);
+            }
+            case "Instituto Ayrton Senna" -> {
+                abertura = LocalTime.of(9, 0);
+                fechamento = LocalTime.of(16, 30);
+            }
+            case "AACD" -> {
+                abertura = LocalTime.of(8, 0);
+                fechamento = LocalTime.of(15, 30);
+            }
+            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Data ou horário inválido ou indisponível para agendamento.");
+        }
+
+        LocalTime horarioAgendamento = agendamento.toLocalTime();
+        if (horarioAgendamento.isBefore(abertura) || horarioAgendamento.isAfter(fechamento)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Data ou horário inválido ou indisponível para agendamento.");
+        }
     }
 
     @PutMapping("/{id}")

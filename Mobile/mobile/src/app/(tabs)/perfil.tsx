@@ -38,7 +38,7 @@ export default function PerfilScreen() {
       const data = await ApiService.getDoacoesUsuario(usuario.id);
       setDoacoes(data || []);
     } catch (e) {
-      console.error('Erro ao buscar dados do perfil:', e);
+      console.error('Erro ao buscar doações do perfil:', e);
     }
   };
 

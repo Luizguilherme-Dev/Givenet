@@ -2,6 +2,7 @@ import React from 'react';
 import { Tabs } from 'expo-router';
 import { Platform, StyleSheet, View } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GiveNetTheme } from '@/constants/colors';
 import { Glass, Radius, Shadow } from '@/constants/design';
 import { TabBarIcon } from '@/components/ui';
@@ -14,6 +15,8 @@ import { TabBarIcon } from '@/components/ui';
  * Nada foi criado, removido ou renomeado.
  */
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tabs
       screenOptions={{
@@ -25,9 +28,9 @@ export default function TabLayout() {
           backgroundColor: 'transparent',
           borderTopWidth: 0,
           elevation: 0,
-          height: Platform.OS === 'ios' ? 88 : 68,
+          height: 68 + Math.max(insets.bottom, Platform.OS === 'ios' ? 20 : 0),
           paddingTop: 8,
-          paddingBottom: Platform.OS === 'ios' ? 26 : 8,
+          paddingBottom: Math.max(insets.bottom, 8),
           paddingHorizontal: 8,
         },
         tabBarBackground: () => (
@@ -47,7 +50,7 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontSize: 10.5,
           fontWeight: '700',
-          marginTop: 2,
+          marginTop: 1,
         },
         tabBarItemStyle: {
           paddingTop: 4,
@@ -127,7 +130,7 @@ const styles = StyleSheet.create({
     ...Shadow.raised,
   },
   glassTint: {
-    backgroundColor: 'rgba(18, 11, 34, 0.55)',
+    backgroundColor: 'rgba(18, 11, 34, 0.82)',
   },
   sheen: {
     position: 'absolute',

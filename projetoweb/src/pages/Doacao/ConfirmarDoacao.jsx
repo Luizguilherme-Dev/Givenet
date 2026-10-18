@@ -56,6 +56,10 @@ export default function ConfirmarDoacao() {
   const [doacaoId, setDoacaoId] = useState(agendamentoId || "");
   const [doacao, setDoacao] = useState(null);
   const [buscando, setBuscando] = useState(false);
+  const [filtros, setFiltros] = useState({ nome: "", item: "", data: "", horario: "", id: "" });
+  const [resultadosBusca, setResultadosBusca] = useState([]);
+  const [buscandoResultados, setBuscandoResultados] = useState(false);
+  const [buscaRealizada, setBuscaRealizada] = useState(false);
   const [metodo, setMetodo] = useState(qrDoacaoId ? "qr" : "pin");
   const [pin, setPin] = useState("");
   const [progresso, setProgresso] = useState("idle");
@@ -79,6 +83,60 @@ export default function ConfirmarDoacao() {
       setBuscando(false);
     }
   }, []);
+
+  const buscarDoacoes = async () => {
+    if (!Object.values(filtros).some((valor) => valor.trim())) {
+      return toast.warning("Informe pelo menos um filtro para buscar doações.");
+    }
+
+    setBuscandoResultados(true);
+    setBuscaRealizada(false);
+    setDoacao(null);
+    setDoacaoId("");
+    setPin("");
+    try {
+      const params = Object.fromEntries(
+        Object.entries(filtros)
+          .filter(([, valor]) => valor.trim())
+          .map(([campo, valor]) => [campo, valor.trim()])
+      );
+      const res = await axios.get("http://localhost:8080/doacoes/buscar", { params });
+      setResultadosBusca(res.data);
+      setBuscaRealizada(true);
+    } catch (err) {
+      setResultadosBusca([]);
+      toast.error(err.response?.data?.message || "Não foi possível buscar as doações.");
+    } finally {
+      setBuscandoResultados(false);
+    }
+  };
+
+  const selecionarDoacao = (selecionada) => {
+    setDoacao(selecionada);
+    setDoacaoId(String(selecionada.id));
+    setPin("");
+    setMetodo("pin");
+    setProgresso("idle");
+  };
+
+  const formatarData = (data) => {
+    if (!data) return "—";
+    const [ano, mes, dia] = data.slice(0, 10).split("-");
+    return ano && mes && dia ? `${dia}/${mes}/${ano}` : data;
+  };
+
+  const formatarStatus = (status) => {
+    switch (status) {
+      case "AGENDADO":
+        return "Agendada";
+      case "DOACAO_ENTREGUE":
+        return "Entregue";
+      case "CANCELADO":
+        return "Cancelada";
+      default:
+        return status || "—";
+    }
+  };
 
   useEffect(() => {
     const id = qrDoacaoId || agendamentoId;
@@ -144,16 +202,138 @@ export default function ConfirmarDoacao() {
     <div className="conf-page">
       <AuroraBg />
       <div className="conf-container">
-        <h2 className="conf-titulo">Confirmar Entrega</h2>
-        <p className="conf-sub">Painel restrito a ONGs e administradores</p>
+        <header className="conf-header">
+          <span className="conf-header-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M4 8.5 12 4l8 4.5v9L12 22l-8-4.5v-9Z" />
+              <path d="m4.5 8.7 7.5 4.2 7.5-4.2M12 13v8.5M8 6.2l8 4.6" />
+              <path d="m9.5 16 1.7 1.7 3.5-3.5" />
+            </svg>
+          </span>
+          <div className="conf-header-copy">
+            <h1 className="conf-titulo">Confirmar entrega</h1>
+            <p className="conf-sub">Consulte uma doação e registre sua entrega.</p>
+          </div>
+          <span className="conf-acesso">Área restrita a ONGs e administradores</span>
+        </header>
 
         {progresso !== "concluido" && (
           <>
-            <div className="conf-group">
-              <label className="conf-label">ID da Doação</label>
+            <div className="conf-group conf-filtros">
+              <div className="conf-section-heading">
+                <h2 className="conf-section-title">Buscar doações</h2>
+                <p className="conf-section-sub">Use um ou mais filtros para encontrar doações agendadas.</p>
+              </div>
+              <div className="conf-filtros-grid">
+                <div className="conf-filter-field">
+                  <label className="conf-label" htmlFor="conf-filtro-nome">Nome do doador</label>
+                  <input
+                    className="conf-input"
+                    id="conf-filtro-nome"
+                    type="text"
+                    placeholder="Ex.: Maria Silva"
+                    value={filtros.nome}
+                    onChange={(e) => setFiltros({ ...filtros, nome: e.target.value })}
+                  />
+                </div>
+                <div className="conf-filter-field">
+                  <label className="conf-label" htmlFor="conf-filtro-item">Item doado</label>
+                  <input
+                    className="conf-input"
+                    id="conf-filtro-item"
+                    type="text"
+                    placeholder="Ex.: alimentos"
+                    value={filtros.item}
+                    onChange={(e) => setFiltros({ ...filtros, item: e.target.value })}
+                  />
+                </div>
+                <div className="conf-filtros-row">
+                  <div className="conf-filter-field">
+                    <label className="conf-label" htmlFor="conf-filtro-data">Data</label>
+                    <input
+                      className="conf-input"
+                      id="conf-filtro-data"
+                      type="date"
+                      aria-label="Data"
+                      value={filtros.data}
+                      onChange={(e) => setFiltros({ ...filtros, data: e.target.value })}
+                    />
+                  </div>
+                  <div className="conf-filter-field">
+                    <label className="conf-label" htmlFor="conf-filtro-horario">Horário</label>
+                    <input
+                      className="conf-input"
+                      id="conf-filtro-horario"
+                      type="time"
+                      aria-label="Horário"
+                      value={filtros.horario}
+                      onChange={(e) => setFiltros({ ...filtros, horario: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="conf-filter-field">
+                  <label className="conf-label" htmlFor="conf-filtro-id">ID da doação</label>
+                  <input
+                    className="conf-input"
+                    id="conf-filtro-id"
+                    type="number"
+                    min="1"
+                    placeholder="Ex.: 12"
+                    value={filtros.id}
+                    onChange={(e) => setFiltros({ ...filtros, id: e.target.value })}
+                  />
+                </div>
+              </div>
+              <button
+                className="conf-btn-buscar conf-btn-buscar-lista"
+                onClick={buscarDoacoes}
+                disabled={buscandoResultados}
+              >
+                {buscandoResultados ? <span className="conf-spinner" /> : "Buscar doações"}
+              </button>
+
+              {buscaRealizada && (
+                <div className="conf-resultados">
+                  <h3 className="conf-resultados-titulo">
+                    {resultadosBusca.length
+                      ? `Resultados encontrados (${resultadosBusca.length})`
+                      : "Nenhuma doação encontrada"}
+                  </h3>
+                  {resultadosBusca.map((resultado) => (
+                    <article className="conf-resultado-card" key={resultado.id}>
+                      <div className="conf-resultado-topo">
+                        <strong>Doação #{resultado.id}</strong>
+                        <span>{formatarStatus(resultado.status)}</span>
+                      </div>
+                      <p><b>Doador:</b> {resultado.nome || "—"}</p>
+                      <p><b>Item:</b> {resultado.itemDoado || resultado.itensTipo || "—"}</p>
+                      <p>
+                        <b>Data:</b> {formatarData(resultado.data)}
+                        {" · "}
+                        <b>Horário:</b> {resultado.horario || "—"}
+                      </p>
+                      <button
+                        className="conf-resultado-selecionar"
+                        onClick={() => selecionarDoacao(resultado)}
+                      >
+                        Selecionar doação
+                      </button>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="conf-group conf-busca-section">
+              <div className="conf-section-heading">
+                <h2 className="conf-section-title">Localizar uma doação pelo ID</h2>
+                <p className="conf-section-sub">Informe o identificador para localizar uma doação específica.</p>
+              </div>
+              <label className="conf-label" htmlFor="conf-doacao-id">ID da doação</label>
               <div className="conf-busca-row">
                 <input
                   className="conf-input"
+                  id="conf-doacao-id"
                   type="number"
                   placeholder="Ex: 12"
                   value={doacaoId}

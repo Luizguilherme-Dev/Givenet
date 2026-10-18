@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
@@ -70,13 +70,6 @@ export const Header: React.FC<{ title?: string; showBack?: boolean }> = ({
               onPress={() => router.push('/(tabs)')}
               activeOpacity={0.8}
             >
-              <View style={styles.logoBadge}>
-                <Image
-                  source={require('@/img/GivenetLogo.jpg')}
-                  style={styles.logoImage}
-                  resizeMode="contain"
-                />
-              </View>
               <View>
                 <Text style={styles.brandTitle}>GiveNet</Text>
                 <Text style={styles.brandSubtitle}>Plataforma de Doações</Text>
@@ -181,34 +174,19 @@ const styles = StyleSheet.create({
   brandRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-  },
-  logoBadge: {
-    width: 38,
-    height: 38,
-    borderRadius: Radius.sm,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    ...Shadow.glow,
-  },
-  logoImage: {
-    width: 34,
-    height: 34,
-    borderRadius: 11,
   },
   brandTitle: {
-    fontSize: 17,
-    fontWeight: '900',
+    fontSize: 18,
+    fontWeight: '800',
     color: GiveNetTheme.textPrimary,
-    letterSpacing: -0.2,
+    letterSpacing: -0.35,
   },
   brandSubtitle: {
     ...Type.caption,
-    fontSize: 10,
+    fontSize: 10.5,
     fontWeight: '600',
     color: GiveNetTheme.textSecondary,
+    marginTop: 1,
   },
   headerTitle: {
     ...Type.subheading,

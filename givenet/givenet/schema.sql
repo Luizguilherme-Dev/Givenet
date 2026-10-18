@@ -61,6 +61,17 @@ CREATE TABLE ong_solicitacao (
 );
 GO
 
+-- Impede solicitações pendentes duplicadas para o mesmo e-mail ou CNPJ.
+CREATE UNIQUE INDEX ux_ong_solicitacao_email_pendente
+    ON ong_solicitacao (email)
+    WHERE status = 'PENDENTE';
+GO
+
+CREATE UNIQUE INDEX ux_ong_solicitacao_cnpj_pendente
+    ON ong_solicitacao (cnpj)
+    WHERE status = 'PENDENTE' AND cnpj IS NOT NULL;
+GO
+
 -- =============================================
 -- Tabela: doacao
 -- Hibernate gera: id, nome, email, horario, data, usuario_id,

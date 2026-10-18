@@ -93,7 +93,7 @@ export default function SolicitarOng() {
               </div>
             ))}
             <div className="solicitacao-field">
-              <label htmlFor="solicitacao-senha">Senha da conta</label>
+              <label htmlFor="solicitacao-senha">Crie a senha de acesso (usada após a aprovação)</label>
               <input
                 id="solicitacao-senha"
                 name="senha"

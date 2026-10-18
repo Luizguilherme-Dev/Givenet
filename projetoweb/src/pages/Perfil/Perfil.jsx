@@ -66,7 +66,22 @@ function Perfil() {
               ? <img src={foto} alt="avatar" className="perfil-avatar perfil-avatar-img" />
               : <div className="perfil-avatar">{usuario.nome?.[0]?.toUpperCase() ?? "?"}</div>
             }
-            <div className="perfil-avatar-overlay">Alterar</div>
+            <div className="perfil-avatar-overlay">
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                width="28"
+                height="28"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M14 4h-4l-2 3H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2-3Z" />
+                <circle cx="12" cy="13" r="3" />
+              </svg>
+            </div>
             <input id="input-foto" type="file" accept="image/*" style={{ display: "none" }} onChange={handleFotoChange} />
           </div>
           <div>

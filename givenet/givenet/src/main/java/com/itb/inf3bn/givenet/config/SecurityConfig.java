@@ -45,6 +45,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/chat").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/doacoes/{id}/confirmar-entrega")
                         .hasAnyRole("ONG", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/doacoes/buscar")
+                        .hasAnyRole("ONG", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/usuarios").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/usuarios/{id}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/usuarios/{id}").hasRole("ADMIN")

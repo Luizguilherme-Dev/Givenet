@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Header } from '@/components/Header';
 import { OngCard } from '@/components/OngCard';
@@ -19,6 +20,7 @@ import {
   SectionHeader,
 } from '@/components/ui';export default function HomeScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { usuario, isAuthenticated, isAdmin, isOng } = useAuth();
   const podeConfirmarEntrega = isAdmin || isOng;
   const [ongs, setOngs] = useState<Ong[]>([]);
@@ -78,7 +80,10 @@ import {
 
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: TabBarSpace + insets.bottom },
+        ]}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -505,7 +510,7 @@ import {
     paddingHorizontal: Space.lg,
     paddingVertical: Space.lg,
     borderBottomWidth: 1,
-    borderBottomColor: GiveNetTheme.border,
+    borderBottomColor: 'rgba(255, 255, 255, 0.07)',
   },
   stepRowLast: {
     borderBottomWidth: 0,
@@ -536,6 +541,7 @@ import {
   stepTitle: {
     ...Type.bodyStrong,
     color: GiveNetTheme.textPrimary,
+    flexShrink: 1,
   },
   stepDesc: {
     ...Type.caption,

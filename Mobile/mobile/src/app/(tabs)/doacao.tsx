@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   Alert,
+  Modal,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,6 +19,64 @@ import { GiveNetTheme } from '@/constants/colors';
 import { useAuth } from '@/contexts/AuthContext';
 import { ApiService } from '@/services/api';
 import { Ong, Doacao, DoacaoDTO } from '@/types';
+
+const FUSO_AGENDAMENTO = 'America/Sao_Paulo';
+
+const gerarHorarios = (inicio: string, fim: string) => {
+  const horarios: string[] = [];
+  let [hora, minuto] = inicio.split(':').map(Number);
+  const [horaFinal, minutoFinal] = fim.split(':').map(Number);
+
+  while (hora < horaFinal || (hora === horaFinal && minuto <= minutoFinal)) {
+    horarios.push(`${String(hora).padStart(2, '0')}:${String(minuto).padStart(2, '0')}`);
+    minuto += 30;
+    if (minuto >= 60) {
+      hora += 1;
+      minuto = 0;
+    }
+  }
+
+  return horarios;
+};
+
+const HORARIOS_POR_ONG: Record<string, string[]> = {
+  'WWF Brasil': gerarHorarios('08:00', '17:30'),
+  'Instituto Ayrton Senna': gerarHorarios('09:00', '16:30'),
+  AACD: gerarHorarios('08:00', '15:30'),
+};
+
+const dataNoFusoAgendamento = (data: Date) => {
+  const partes = new Intl.DateTimeFormat('en-CA', {
+    timeZone: FUSO_AGENDAMENTO,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(data);
+  const valores = Object.fromEntries(partes.map(({ type, value }) => [type, value]));
+  return `${valores.year}-${valores.month}-${valores.day}`;
+};
+
+const horarioNoFusoAgendamento = (data: Date) =>
+  new Intl.DateTimeFormat('en-GB', {
+    timeZone: FUSO_AGENDAMENTO,
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).format(data);
+
+const adicionarDias = (data: string, quantidade: number) => {
+  const [ano, mes, dia] = data.split('-').map(Number);
+  return new Date(Date.UTC(ano, mes - 1, dia + quantidade)).toISOString().slice(0, 10);
+};
+
+const dataDoAgendamento = (data?: string) => {
+  if (!data) return '';
+  const dataValida = new Date(data);
+  return Number.isNaN(dataValida.getTime()) ? '' : dataNoFusoAgendamento(dataValida);
+};
+
+const formatarDataSelecionada = (data: string) =>
+  new Date(`${data}T12:00:00Z`).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 
 export default function DoacaoScreen() {
   const router = useRouter();
@@ -31,8 +90,12 @@ export default function DoacaoScreen() {
   // Campos do formulário
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
+  const [dataSelecionada, setDataSelecionada] = useState('');
   const [horario, setHorario] = useState('');
   const [itemDoado, setItemDoado] = useState('');
+  const [agora, setAgora] = useState(() => new Date());
+  const [seletorDataVisivel, setSeletorDataVisivel] = useState(false);
+  const [mesCalendario, setMesCalendario] = useState(() => dataNoFusoAgendamento(new Date()).slice(0, 7));
   const [editandoId, setEditandoId] = useState<number | null>(null);
 
   const [doacoes, setDoacoes] = useState<Doacao[]>([]);
@@ -85,6 +148,11 @@ export default function DoacaoScreen() {
     }
   }, [usuario, fetchDoacoes]);
 
+  useEffect(() => {
+    const intervalo = setInterval(() => setAgora(new Date()), 30_000);
+    return () => clearInterval(intervalo);
+  }, []);
+
   const onRefresh = async () => {
     setRefreshing(true);
     await Promise.all([fetchOngs(), fetchDoacoes()]);
@@ -99,13 +167,51 @@ export default function DoacaoScreen() {
         : ['Alimentos', 'Roupas']
     : [];
 
-  const horariosDisponiveis = selectedOng
-    ? Array.isArray(selectedOng.horarios)
-      ? selectedOng.horarios
-      : typeof selectedOng.horarios === 'string'
-        ? (selectedOng.horarios as string).split(',').map((h) => h.trim())
-        : ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00']
-    : ['09:00', '10:00', '14:00', '15:00', '16:00'];
+  const dataHoje = dataNoFusoAgendamento(agora);
+  const horarioAgora = horarioNoFusoAgendamento(agora);
+  const horariosDaOng = selectedOng
+    ? HORARIOS_POR_ONG[selectedOng.nome]
+      ?? (Array.isArray(selectedOng.horarios)
+        ? selectedOng.horarios
+        : typeof selectedOng.horarios === 'string'
+          ? selectedOng.horarios.split(',').map((h) => h.trim())
+          : ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00'])
+    : [];
+  const horariosDeHoje = horariosDaOng.filter((h) => h > horarioAgora);
+  const dataMinima = horariosDeHoje.length > 0 ? dataHoje : adicionarDias(dataHoje, 1);
+  const horariosDisponiveis = !dataSelecionada
+    ? []
+    : dataSelecionada === dataHoje
+      ? horariosDeHoje
+      : horariosDaOng;
+
+  const primeiroDiaMes = new Date(`${mesCalendario}-01T00:00:00Z`);
+  const deslocamentoCalendario = (primeiroDiaMes.getUTCDay() + 6) % 7;
+  const diasNoMes = new Date(
+    Date.UTC(primeiroDiaMes.getUTCFullYear(), primeiroDiaMes.getUTCMonth() + 1, 0),
+  ).getUTCDate();
+  const diasCalendario = Array.from({ length: 42 }, (_, indice) => {
+    const dia = indice - deslocamentoCalendario + 1;
+    if (dia < 1 || dia > diasNoMes) return null;
+    return `${mesCalendario}-${String(dia).padStart(2, '0')}`;
+  });
+  const tituloMesCalendario = primeiroDiaMes.toLocaleDateString('pt-BR', {
+    timeZone: 'UTC',
+    month: 'long',
+    year: 'numeric',
+  });
+  const podeVoltarMes = mesCalendario > dataMinima.slice(0, 7);
+
+  const mudarMesCalendario = (quantidade: number) => {
+    const proximoMes = new Date(Date.UTC(
+      primeiroDiaMes.getUTCFullYear(),
+      primeiroDiaMes.getUTCMonth() + quantidade,
+      1,
+    ));
+    setMesCalendario(
+      `${proximoMes.getUTCFullYear()}-${String(proximoMes.getUTCMonth() + 1).padStart(2, '0')}`,
+    );
+  };
 
   const handleSubmit = async () => {
     if (!isAuthenticated) {
@@ -130,8 +236,18 @@ export default function DoacaoScreen() {
       return;
     }
 
+    if (!dataSelecionada || dataSelecionada < dataMinima) {
+      setFeedbackMsg({ text: 'Por favor selecione uma data disponível para o agendamento.', ok: false });
+      return;
+    }
+
     if (!horario) {
       setFeedbackMsg({ text: 'Por favor selecione um horário de coleta.', ok: false });
+      return;
+    }
+
+    if (!horariosDisponiveis.includes(horario)) {
+      setFeedbackMsg({ text: 'Selecione um horário disponível para a data escolhida.', ok: false });
       return;
     }
 
@@ -143,7 +259,7 @@ export default function DoacaoScreen() {
       email,
       ongId: selectedOng.id,
       horario,
-      data: new Date().toISOString(),
+      data: new Date(`${dataSelecionada}T12:00:00Z`).toISOString(),
       usuarioId: usuario!.id,
       itemDoado: itemDoado || undefined,
       itensTipo: itemDoado || undefined,
@@ -160,6 +276,7 @@ export default function DoacaoScreen() {
       }
 
       setItemDoado('');
+      setDataSelecionada('');
       setHorario('');
       await fetchDoacoes();
 
@@ -181,6 +298,8 @@ export default function DoacaoScreen() {
     setEditandoId(doacao.id);
     setNome(doacao.nome);
     setEmail(doacao.email);
+    const dataSalva = dataDoAgendamento(doacao.data);
+    setDataSelecionada(dataSalva && dataSalva >= dataHoje ? dataSalva : dataHoje);
     setHorario(doacao.horario);
     setItemDoado(doacao.itemDoado || '');
     if (typeof doacao.ong === 'object') {
@@ -199,6 +318,7 @@ export default function DoacaoScreen() {
       setEmail(usuario.email || '');
     }
     setItemDoado('');
+    setDataSelecionada('');
     setHorario('');
   };
 
@@ -408,6 +528,7 @@ export default function DoacaoScreen() {
                       ]}
                       onPress={() => {
                         setSelectedOng(ong);
+                        setDataSelecionada('');
                         setHorario('');
                       }}
                       activeOpacity={0.7}
@@ -481,44 +602,160 @@ export default function DoacaoScreen() {
               </View>
             </View>
 
+            {/* Data do Agendamento */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Data do Agendamento</Text>
+              <TouchableOpacity
+                style={[styles.datePickerButton, !selectedOng && styles.datePickerButtonDisabled]}
+                onPress={() => {
+                  if (!selectedOng) return;
+                  setMesCalendario((dataSelecionada || dataMinima).slice(0, 7));
+                  setSeletorDataVisivel(true);
+                }}
+                disabled={!selectedOng}
+                accessibilityRole="button"
+                accessibilityLabel={dataSelecionada
+                  ? `Data selecionada: ${formatarDataSelecionada(dataSelecionada)}`
+                  : 'Escolher data do agendamento'}
+              >
+                <Ionicons name="calendar-outline" size={18} color={GiveNetTheme.primaryLight} />
+                <Text style={dataSelecionada ? styles.datePickerText : styles.datePickerPlaceholder}>
+                  {dataSelecionada
+                    ? formatarDataSelecionada(dataSelecionada)
+                    : selectedOng ? 'Escolher data' : 'Selecione uma ONG primeiro'}
+                </Text>
+                <Ionicons name="chevron-down" size={16} color={GiveNetTheme.textMuted} />
+              </TouchableOpacity>
+            </View>
+
             {/* Horário de Coleta */}
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Horário de Coleta / Entrega</Text>
-              <View style={styles.chipsContainer}>
-                {horariosDisponiveis.map((h) => {
-                  const isSelected = horario === h;
-                  return (
-                    <TouchableOpacity
-                      key={h}
-                      style={[
-                        styles.horarioChip,
-                        isSelected && styles.horarioChipActive,
-                      ]}
-                      onPress={() => setHorario(isSelected ? '' : h)}
-                    >
-                      <Ionicons
-                        name="time-outline"
-                        size={12}
-                        color={isSelected ? '#FFFFFF' : GiveNetTheme.textMuted}
-                      />
-                      <Text
+              {!dataSelecionada ? (
+                <Text style={styles.dateHelperText}>Escolha uma data para ver os horários disponíveis.</Text>
+              ) : horariosDisponiveis.length === 0 ? (
+                <Text style={styles.dateHelperText}>Não há mais horários disponíveis nessa data.</Text>
+              ) : (
+                <View style={styles.chipsContainer}>
+                  {horariosDisponiveis.map((h) => {
+                    const isSelected = horario === h;
+                    return (
+                      <TouchableOpacity
+                        key={h}
                         style={[
-                          styles.horarioChipText,
-                          isSelected && styles.horarioChipTextActive,
+                          styles.horarioChip,
+                          isSelected && styles.horarioChipActive,
                         ]}
+                        onPress={() => setHorario(isSelected ? '' : h)}
                       >
-                        {h}h
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
+                        <Ionicons
+                          name="time-outline"
+                          size={12}
+                          color={isSelected ? '#FFFFFF' : GiveNetTheme.textMuted}
+                        />
+                        <Text
+                          style={[
+                            styles.horarioChipText,
+                            isSelected && styles.horarioChipTextActive,
+                          ]}
+                        >
+                          {h}h
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              )}
               {horario ? (
                 <Text style={styles.horarioPreview}>
-                  🕒 Coleta agendada para às {horario}h
+                  🕒 Coleta agendada para {formatarDataSelecionada(dataSelecionada)} às {horario}h
                 </Text>
               ) : null}
             </View>
+
+            <Modal
+              visible={seletorDataVisivel}
+              transparent
+              animationType="fade"
+              onRequestClose={() => setSeletorDataVisivel(false)}
+            >
+              <View style={styles.calendarOverlay}>
+                <View style={styles.calendarCard}>
+                  <View style={styles.calendarHeader}>
+                    <Text style={styles.calendarTitle}>Escolha uma data</Text>
+                    <TouchableOpacity
+                      onPress={() => setSeletorDataVisivel(false)}
+                      accessibilityRole="button"
+                      accessibilityLabel="Fechar calendário"
+                    >
+                      <Ionicons name="close" size={22} color={GiveNetTheme.textSecondary} />
+                    </TouchableOpacity>
+                  </View>
+                  <View style={styles.calendarMonthHeader}>
+                    <TouchableOpacity
+                      onPress={() => mudarMesCalendario(-1)}
+                      disabled={!podeVoltarMes}
+                      style={styles.calendarMonthButton}
+                      accessibilityRole="button"
+                      accessibilityLabel="Mês anterior"
+                    >
+                      <Ionicons
+                        name="chevron-back"
+                        size={18}
+                        color={podeVoltarMes ? GiveNetTheme.textPrimary : GiveNetTheme.textMuted}
+                      />
+                    </TouchableOpacity>
+                    <Text style={styles.calendarMonthTitle}>{tituloMesCalendario}</Text>
+                    <TouchableOpacity
+                      onPress={() => mudarMesCalendario(1)}
+                      style={styles.calendarMonthButton}
+                      accessibilityRole="button"
+                      accessibilityLabel="Próximo mês"
+                    >
+                      <Ionicons name="chevron-forward" size={18} color={GiveNetTheme.textPrimary} />
+                    </TouchableOpacity>
+                  </View>
+                  <View style={styles.calendarGrid}>
+                    {['S', 'T', 'Q', 'Q', 'S', 'S', 'D'].map((dia, indice) => (
+                      <Text key={`${dia}-${indice}`} style={styles.calendarWeekday}>{dia}</Text>
+                    ))}
+                    {diasCalendario.map((dia, indice) => {
+                      const desabilitado = !dia || dia < dataMinima;
+                      const selecionado = dia === dataSelecionada;
+                      return (
+                        <TouchableOpacity
+                          key={dia || `vazio-${indice}`}
+                          style={[
+                            styles.calendarDay,
+                            selecionado && styles.calendarDaySelected,
+                          ]}
+                          disabled={desabilitado}
+                          onPress={() => {
+                            if (!dia) return;
+                            setDataSelecionada(dia);
+                            setHorario('');
+                            setSeletorDataVisivel(false);
+                          }}
+                          accessibilityRole="button"
+                          accessibilityLabel={dia ? formatarDataSelecionada(dia) : undefined}
+                        >
+                          <Text
+                            style={[
+                              styles.calendarDayText,
+                              desabilitado && styles.calendarDayDisabled,
+                              selecionado && styles.calendarDayTextSelected,
+                            ]}
+                          >
+                            {dia ? Number(dia.slice(-2)) : ''}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                  <Text style={styles.calendarHint}>Datas anteriores e dias sem horários restantes não estão disponíveis.</Text>
+                </View>
+              </View>
+            </Modal>
 
             {/* Feedback Mensagem */}
             {feedbackMsg && (
@@ -810,6 +1047,119 @@ const styles = StyleSheet.create({
     height: 44,
     color: GiveNetTheme.textPrimary,
     fontSize: 13,
+  },
+  datePickerButton: {
+    minHeight: 46,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: GiveNetTheme.inputBackground,
+    borderWidth: 1,
+    borderColor: GiveNetTheme.inputBorder,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+  },
+  datePickerButtonDisabled: {
+    opacity: 0.55,
+  },
+  datePickerText: {
+    flex: 1,
+    color: GiveNetTheme.textPrimary,
+    fontSize: 13,
+  },
+  datePickerPlaceholder: {
+    flex: 1,
+    color: GiveNetTheme.textMuted,
+    fontSize: 13,
+  },
+  dateHelperText: {
+    color: GiveNetTheme.textMuted,
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  calendarOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+  },
+  calendarCard: {
+    backgroundColor: GiveNetTheme.cardBackground,
+    borderColor: GiveNetTheme.border,
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 18,
+  },
+  calendarHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  calendarTitle: {
+    color: GiveNetTheme.textPrimary,
+    fontSize: 17,
+    fontWeight: '800',
+  },
+  calendarMonthHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 16,
+    marginBottom: 10,
+  },
+  calendarMonthButton: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  calendarMonthTitle: {
+    color: GiveNetTheme.textPrimary,
+    fontSize: 14,
+    fontWeight: '700',
+    textTransform: 'capitalize',
+  },
+  calendarGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  calendarWeekday: {
+    width: '14.2857%',
+    height: 32,
+    color: GiveNetTheme.textMuted,
+    fontSize: 11,
+    fontWeight: '700',
+    textAlign: 'center',
+    textAlignVertical: 'center',
+  },
+  calendarDay: {
+    width: '14.2857%',
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
+  },
+  calendarDaySelected: {
+    backgroundColor: GiveNetTheme.primary,
+  },
+  calendarDayText: {
+    color: GiveNetTheme.textPrimary,
+    fontSize: 13,
+  },
+  calendarDayDisabled: {
+    color: GiveNetTheme.textMuted,
+    opacity: 0.35,
+  },
+  calendarDayTextSelected: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+  },
+  calendarHint: {
+    color: GiveNetTheme.textMuted,
+    fontSize: 11,
+    lineHeight: 16,
+    marginTop: 10,
+    textAlign: 'center',
   },
   ongChipsScroll: {
     flexDirection: 'row',

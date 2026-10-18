@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -51,11 +53,36 @@ public class UsuarioController {
 
     @PostMapping
     public Usuario criar(@RequestBody UsuarioDTO dto) {
+        String nome = dto.getNome() == null ? null : dto.getNome().trim();
+        String email = normalizarEmail(dto.getEmail());
+        String senha = dto.getSenha();
+        String telefone = dto.getTelefone() == null ? null : dto.getTelefone().trim();
+
+        if (nome == null || nome.isBlank() || email == null || email.isBlank()
+                || senha == null || senha.length() < 6) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Preencha nome, e-mail e senha com no mínimo 6 caracteres.");
+        }
+        if (nome.length() > 100 || email.length() > 150
+                || (telefone != null && telefone.length() > 20)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Um ou mais campos excedem o tamanho permitido.");
+        }
+        if (!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Informe um e-mail válido.");
+        }
+        if (senha.getBytes(StandardCharsets.UTF_8).length > 72) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A senha excede o tamanho máximo permitido.");
+        }
+        if (repository.existsByEmailIgnoreCase(email)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Este e-mail já está cadastrado.");
+        }
+
         Usuario usuario = new Usuario();
-        usuario.setNome(dto.getNome());
-        usuario.setEmail(dto.getEmail());
-        usuario.setSenha(encoder.encode(dto.getSenha()));
-        usuario.setTelefone(dto.getTelefone());
+        usuario.setNome(nome);
+        usuario.setEmail(email);
+        usuario.setSenha(encoder.encode(senha));
+        usuario.setTelefone(telefone == null || telefone.isBlank() ? null : telefone);
         usuario.setRole("USER");
         return repository.save(usuario);
     }
@@ -96,11 +123,14 @@ public class UsuarioController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credenciais) {
-        String email = credenciais.get("email");
-        String senha = credenciais.get("senha");
-        Optional<Usuario> usuario = repository.findByEmail(email);
+        String email = credenciais == null ? null : normalizarEmail(credenciais.get("email"));
+        String senha = credenciais == null ? null : credenciais.get("senha");
+        if (email == null || email.isBlank() || senha == null || senha.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Informe e-mail e senha.");
+        }
+        Optional<Usuario> usuario = repository.findByEmailIgnoreCase(email);
         if (usuario.isPresent() && encoder.matches(senha, usuario.get().getSenha())) {
-            usuario.get().setRole(usuario.get().getRole().toUpperCase());
+            usuario.get().setRole(usuario.get().getRole().toUpperCase(Locale.ROOT));
             if ("BLOQUEADO".equals(usuario.get().getRole())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Conta bloqueada. Entre em contato com o suporte.");
             }
@@ -119,6 +149,10 @@ public class UsuarioController {
                     jwtService.generateToken(autenticado.getId())));
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email ou senha incorretos");
+    }
+
+    private String normalizarEmail(String email) {
+        return email == null ? null : email.trim().toLowerCase(Locale.ROOT);
     }
 
     @PutMapping("/{id}")

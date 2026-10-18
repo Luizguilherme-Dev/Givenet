@@ -148,7 +148,7 @@ function Home() {
           <span onClick={() => navigate("/Sobre")}>Sobre</span>
           <span onClick={() => navigate("/ong")}>ONGs</span>
           <span onClick={() => navigate("/Faq")}>FAQ</span>
-          <span onClick={() => navigate("/Chat")}>Contato</span>
+          
         </div>
         <p>© 2026 Give Net. Todos os direitos reservados. Feito com amor</p>
       </footer>

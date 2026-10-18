@@ -20,7 +20,7 @@ const gerarSlots = (inicio, fim) => {
   const slots = [];
   let [h, m] = inicio.split(":").map(Number);
   const [hf, mf] = fim.split(":").map(Number);
-  while (h < hf || (h === hf && m < mf)) {
+  while (h < hf || (h === hf && m <= mf)) {
     slots.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
     m += 30;
     if (m >= 60) { h++; m = 0; }
@@ -29,9 +29,41 @@ const gerarSlots = (inicio, fim) => {
 };
 
 const horariosPorONG = {
-  "WWF Brasil": [...gerarSlots("08:00", "12:00"), ...gerarSlots("14:00", "18:00")],
-  "Instituto Ayrton Senna": gerarSlots("09:00", "17:00"),
-  "AACD": gerarSlots("08:00", "16:00"),
+  "WWF Brasil": gerarSlots("08:00", "17:30"),
+  "Instituto Ayrton Senna": gerarSlots("09:00", "16:30"),
+  "AACD": gerarSlots("08:00", "15:30"),
+};
+
+const fusoAgendamento = "America/Sao_Paulo";
+
+const dataNoFusoAgendamento = (data) => {
+  const partes = new Intl.DateTimeFormat("en-CA", {
+    timeZone: fusoAgendamento,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(data);
+  const valores = Object.fromEntries(partes.map(({ type, value }) => [type, value]));
+  return `${valores.year}-${valores.month}-${valores.day}`;
+};
+
+const horarioNoFusoAgendamento = (data) =>
+  new Intl.DateTimeFormat("en-GB", {
+    timeZone: fusoAgendamento,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(data);
+
+const adicionarDias = (data, quantidade) => {
+  const [ano, mes, dia] = data.split("-").map(Number);
+  const resultado = new Date(Date.UTC(ano, mes - 1, dia + quantidade));
+  return resultado.toISOString().slice(0, 10);
+};
+
+const dataDoAgendamento = (data) => {
+  const dataValida = new Date(data);
+  return Number.isNaN(dataValida.getTime()) ? "" : dataNoFusoAgendamento(dataValida);
 };
 
 const aceitaPorONG = {
@@ -43,8 +75,10 @@ const aceitaPorONG = {
 const Doacao = () => {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
+  const [data, setData] = useState("");
   const [ong, setOng] = useState("");
   const [horario, setHorario] = useState("");
+  const [agora, setAgora] = useState(() => new Date());
   const [itemDoado, setItemDoado] = useState("");
   const [doacoes, setDoacoes] = useState([]);
   const [editandoId, setEditandoId] = useState(null);
@@ -81,17 +115,40 @@ const Doacao = () => {
     }
   }, [fetchDoacoes]);
 
+  useEffect(() => {
+    const intervalo = window.setInterval(() => setAgora(new Date()), 30_000);
+    return () => window.clearInterval(intervalo);
+  }, []);
+
   const aceitaItens = ong ? aceitaPorONG[ong] || [] : [];
-  const horariosDisponiveis = ong ? horariosPorONG[ong] || [] : [];
+  const dataHoje = dataNoFusoAgendamento(agora);
+  const horarioAgora = horarioNoFusoAgendamento(agora);
+  const horariosDaOng = ong ? horariosPorONG[ong] || [] : [];
+  const horariosDeHoje = horariosDaOng.filter((h) => h > horarioAgora);
+  const dataMinima = horariosDeHoje.length > 0 ? dataHoje : adicionarDias(dataHoje, 1);
+  const horariosDisponiveis = !data
+    ? []
+    : data === dataHoje
+      ? horariosDeHoje
+      : horariosDaOng;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!data || data < dataMinima) {
+      toast.error("Selecione uma data disponível para o agendamento.");
+      return;
+    }
+    if (!horariosDisponiveis.includes(horario)) {
+      toast.error("Selecione um horário disponível para a data escolhida.");
+      return;
+    }
+
     const payload = {
       nome,
       email,
       ongId: ONG_IDS[ong],
       horario,
-      data: new Date().toISOString(),
+      data: new Date(`${data}T12:00:00Z`).toISOString(),
       usuarioId: usuarioLogado?.id,
       itemDoado: itemDoado || null,
     };
@@ -110,6 +167,7 @@ const Doacao = () => {
         toast.success("Doação registrada com sucesso!");
       }
       setOng("");
+      setData("");
       setHorario("");
       setItemDoado("");
       await fetchDoacoes();
@@ -125,6 +183,8 @@ const Doacao = () => {
     setNome(doacao.nome);
     setEmail(doacao.email);
     setOng(typeof doacao.ong === "object" ? doacao.ong?.nome : doacao.ong || "");
+    const dataSalva = dataDoAgendamento(doacao.data);
+    setData(dataSalva && dataSalva >= dataHoje ? dataSalva : dataHoje);
     setHorario(doacao.horario);
     setItemDoado(doacao.itemDoado || "");
     setAba("registrar");
@@ -135,6 +195,7 @@ const Doacao = () => {
     setNome(usuarioLogado?.nome || "");
     setEmail(usuarioLogado?.email || "");
     setOng("");
+    setData("");
     setHorario("");
     setItemDoado("");
     setAba("registrar");
@@ -211,23 +272,24 @@ const Doacao = () => {
 
       <div className="page-content">
         <div className="cadastro-container">
-          <span className="donation-eyebrow">Give Net · Plataforma de Doações</span>
-          <h2 className="cadastro-title">
-            {editandoId ? "Editar Doação" : "Doações"}
-          </h2>
-          <p className="cadastro-subtitle">Give Net - Plataforma de Doações</p>
+          <header className="donation-page-header">
+            <span className="donation-header-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m21 8-9-5-9 5v8l9 5 9-5V8Z" />
+                <path d="m3 8 9 5 9-5M12 13v8" />
+              </svg>
+            </span>
+            <div className="donation-header-copy">
+              <h1>{editandoId ? "Editar doação" : "Doações"}</h1>
+              <p>Agende uma doação e acompanhe seus registros.</p>
+            </div>
+            <span className="donation-access-badge">Agendamento de doações</span>
+          </header>
 
           {isAdmin && (
             <button
               type="button"
-              className="btn-cadastrar"
-              style={{
-                marginBottom: 8,
-                background: "rgba(168,85,247,0.18)",
-                borderColor: "rgba(168,85,247,0.4)",
-                color: "#4ade80",
-                fontSize: "1rem",
-              }}
+              className="btn-confirmar-entrega"
               onClick={() => navigate("/confirmar-doacao")}
             >
               Confirmar Entrega de Doação
@@ -268,81 +330,114 @@ const Doacao = () => {
                   Escolha a organização, o item, a data e o horário para realizar sua doação.
                 </p>
               </div>
-              <div className="form-group">
-                <label className="form-label">Nome</label>
-                <div className="field-wrap">
-                  {iconUser}
-                  <input type="text" className="form-input" value={nome}
-                    onChange={(e) => setNome(e.target.value)} placeholder="Seu nome" required />
-                </div>
-              </div>
-              <div className="form-group">
-                <label className="form-label">E-mail</label>
-                <div className="field-wrap">
-                  {iconMail}
-                  <input type="email" className="form-input" value={email}
-                    onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" required />
-                </div>
-              </div>
-              <div className="form-group">
-                <label className="form-label">ONG Destino</label>
-                <div className="field-wrap">
-                  {iconBuilding}
-                  <select className="form-input" value={ong} onChange={(e) => { setOng(e.target.value); setHorario(""); }} required>
-                  <option value="">Selecione uma ONG</option>
-                  <option value="WWF Brasil">WWF Brasil</option>
-                  <option value="Instituto Ayrton Senna">Instituto Ayrton Senna</option>
-                  <option value="AACD">AACD</option>
-                  </select>
-                </div>
-              </div>
-              <div className="form-group">
-                <label className="form-label">O que essa ONG aceita</label>
-                {aceitaItens.length === 0 ? (
-                  <div className="ong-aceita">Selecione uma ONG para ver as doações aceitas.</div>
-                ) : (
-                  <div className="ong-chips">
-                    {aceitaItens.map((item) => (
-                      <button
-                        key={item}
-                        type="button"
-                        className={`ong-chip ${itemDoado === item ? "ong-chip-ativo" : ""}`}
-                        onClick={() => setItemDoado(itemDoado === item ? "" : item)}
-                      >
-                        {item}
-                      </button>
-                    ))}
+              <div className="donation-fields-grid">
+                <div className="form-group">
+                  <label className="form-label">Nome</label>
+                  <div className="field-wrap">
+                    {iconUser}
+                    <input type="text" className="form-input" value={nome}
+                      onChange={(e) => setNome(e.target.value)} placeholder="Seu nome" required />
                   </div>
-                )}
-              </div>
-              <div className="form-group">
-                <label className="form-label">Item que será doado</label>
-                <div className="field-wrap">
-                  {iconBox}
-                  <input type="text" className="form-input" value={itemDoado}
-                    onChange={(e) => setItemDoado(e.target.value)}
-                    placeholder="Ex: Caixas de remédio, roupas infantis..." />
                 </div>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Horário de Coleta</label>
-                <div className="ong-chips">
-                  {horariosDisponiveis.length === 0 ? (
-                    <div className="ong-aceita">Selecione uma ONG para ver os horários disponíveis.</div>
+                <div className="form-group">
+                  <label className="form-label">E-mail</label>
+                  <div className="field-wrap">
+                    {iconMail}
+                    <input type="email" className="form-input" value={email}
+                      onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" required />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">ONG Destino</label>
+                  <div className="field-wrap">
+                    {iconBuilding}
+                    <select className="form-input" value={ong} onChange={(e) => { setOng(e.target.value); setData(""); setHorario(""); }} required>
+                    <option value="">Selecione uma ONG</option>
+                    <option value="WWF Brasil">WWF Brasil</option>
+                    <option value="Instituto Ayrton Senna">Instituto Ayrton Senna</option>
+                    <option value="AACD">AACD</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="form-group donation-grid-wide">
+                  <label className="form-label">O que essa ONG aceita</label>
+                  {aceitaItens.length === 0 ? (
+                    <div className="ong-aceita">Selecione uma ONG para ver as doações aceitas.</div>
                   ) : (
-                    horariosDisponiveis.map((h) => (
-                      <button
-                        key={h}
-                        type="button"
-                        className={`ong-chip ${horario === h ? "ong-chip-ativo" : ""}`}
-                        onClick={() => setHorario(horario === h ? "" : h)}
-                      >
-                        {h}
-                      </button>
-                    ))
+                    <div className="ong-chips">
+                      {aceitaItens.map((item) => (
+                        <button
+                          key={item}
+                          type="button"
+                          className={`ong-chip ${itemDoado === item ? "ong-chip-ativo" : ""}`}
+                          onClick={() => setItemDoado(itemDoado === item ? "" : item)}
+                        >
+                          {item}
+                        </button>
+                      ))}
+                    </div>
                   )}
                 </div>
-                {horario && <span className="horario-preview">Coleta agendada para às {horario}h</span>}
+                <div className="form-group">
+                  <label className="form-label">Item que será doado</label>
+                  <div className="field-wrap">
+                    {iconBox}
+                    <input type="text" className="form-input" value={itemDoado}
+                      onChange={(e) => setItemDoado(e.target.value)}
+                      placeholder="Ex: Caixas de remédio, roupas infantis..." />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label" htmlFor="data-agendamento">Data do Agendamento</label>
+                  <input
+                    id="data-agendamento"
+                    type="date"
+                    className="form-input"
+                    value={data}
+                    min={dataMinima}
+                    disabled={!ong}
+                    onClick={(e) => {
+                      if (typeof e.currentTarget.showPicker === "function") {
+                        e.currentTarget.showPicker();
+                      }
+                    }}
+                    onChange={(e) => {
+                      setData(e.target.value);
+                      setHorario("");
+                    }}
+                    required
+                  />
+                </div>
+                <div className="form-group donation-grid-wide">
+                  <label className="form-label">Horário de Coleta</label>
+                  <div className="ong-chips">
+                    {horariosDisponiveis.length === 0 ? (
+                      <div className="ong-aceita">
+                        {!ong
+                          ? "Selecione uma ONG para ver os horários disponíveis."
+                          : !data
+                            ? "Selecione uma data para ver os horários disponíveis."
+                            : "Não há mais horários disponíveis nessa data."}
+                      </div>
+                    ) : (
+                      horariosDisponiveis.map((h) => (
+                        <button
+                          key={h}
+                          type="button"
+                          className={`ong-chip ${horario === h ? "ong-chip-ativo" : ""}`}
+                          onClick={() => setHorario(horario === h ? "" : h)}
+                        >
+                          {h}
+                        </button>
+                      ))
+                    )}
+                  </div>
+                  {horario && (
+                    <span className="horario-preview">
+                      Coleta agendada para {new Date(`${data}T12:00:00Z`).toLocaleDateString("pt-BR", { timeZone: "UTC" })} às {horario}h
+                    </span>
+                  )}
+                </div>
               </div>
               <button type="submit" className="btn-cadastrar btn-donacao">
                 <span className="btn-donacao-label">

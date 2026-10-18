@@ -33,6 +33,14 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen
+          name="cadastro-ong"
+          options={{
+            presentation: 'modal',
+            animation: 'slide_from_bottom',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
           name="confirmar"
           options={{
             headerShown: false,
@@ -60,4 +68,3 @@ export default function RootLayout() {
     </AuthProvider>
   );
 }
-

@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GiveNetTheme } from '@/constants/colors';
-import { Radius, Shadow, Type } from '@/constants/design';
+import { Radius, Type } from '@/constants/design';
 import { PressableScale } from './PressableScale';
 
 type Tone = 'primary' | 'accent' | 'success' | 'warning' | 'secondary';
@@ -35,13 +35,9 @@ export const ActionTile: React.FC<Props> = ({ title, subtitle, icon, tone = 'pri
       <View style={styles.chevron}>
         <Ionicons name="chevron-forward" size={14} color={GiveNetTheme.textMuted} />
       </View>
-      <Text style={styles.title} numberOfLines={1}>
-        {title}
-      </Text>
+      <Text style={styles.title}>{title}</Text>
       {subtitle ? (
-        <Text style={styles.subtitle} numberOfLines={1}>
-          {subtitle}
-        </Text>
+        <Text style={styles.subtitle}>{subtitle}</Text>
       ) : null}
     </PressableScale>
   );
@@ -49,17 +45,16 @@ export const ActionTile: React.FC<Props> = ({ title, subtitle, icon, tone = 'pri
 
 const styles = StyleSheet.create({
   card: {
-    width: '47%',
-    minWidth: 140,
+    flexBasis: '47%',
     flexGrow: 1,
+    minWidth: 0,
     backgroundColor: GiveNetTheme.cardBackground,
     borderRadius: Radius.md,
     padding: 14,
     borderWidth: 1,
-    borderColor: GiveNetTheme.border,
-    minHeight: 126,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    minHeight: 128,
     justifyContent: 'flex-start',
-    ...Shadow.soft,
   },
   iconBox: {
     width: 42,
@@ -68,7 +63,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 14,
+    marginBottom: 12,
   },
   chevron: {
     position: 'absolute',
@@ -85,11 +80,13 @@ const styles = StyleSheet.create({
     ...Type.bodyStrong,
     fontSize: 13.5,
     color: GiveNetTheme.textPrimary,
+    flexShrink: 1,
   },
   subtitle: {
     ...Type.caption,
     fontWeight: '600',
     color: GiveNetTheme.textMuted,
     marginTop: 2,
+    flexShrink: 1,
   },
 });
